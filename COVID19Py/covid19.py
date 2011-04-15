@@ -1,8 +1,55 @@
 from typing import Dict, List
 import requests
 import json
+from abc import ABC, abstractmethod
 
-class COVID19(object):
+
+class COVID19Bridge:
+    @abstractmethod
+     def __init__(self, url="https://covid-tracker-us.herokuapp.com", data_source='jhu'):
+         pass
+
+    @abstractmethod
+    def _update(self, timelines):
+        pass
+
+    @abstractmethod
+    def _getSources(self):
+        pass
+
+    @abstractmethod
+    def _request(self, endpoint, params=None):
+        pass
+
+    @abstractmethod
+    def getAll(self, timelines=False):
+        pass
+
+    @abstractmethod
+    def getLatestChanges(self):
+        pass
+
+    @abstractmethod
+    def getLatest(self) -> List[Dict[str, int]]:
+         pass
+
+    @abstractmethod
+    def getLocations(self, timelines=False, rank_by: str = None) -> List[Dict]:
+        pass
+
+    @abstractmethod
+    def getLocationByCountryCode(self, country_code, timelines=False) -> List[Dict]:
+        pass
+
+    @abstractmethod
+    def getLocationByCountry(self, country, timelines=False) -> List[Dict]:
+        pass
+
+    @abstractmethod
+    def getLocationById(self, country_id: int):
+        pass
+
+class COVID19(COVID19Bridge):
     default_url = "https://covid-tracker-us.herokuapp.com"
     url = ""
     data_source = ""
@@ -17,12 +64,12 @@ class COVID19(object):
         # Skip mirror checking if custom url was passed
         if url == self.default_url:
             # Load mirrors
-            response = requests.get(self.mirrors_source)
+            response = requests.get(self.mirrors_source) 
             response.raise_for_status()
             self.mirrors = response.json()
 
             # Try to get sources as a test
-            for mirror in self.mirrors:
+            for mirror in self.mirrors:  
                 # Set URL of mirror
                 self.url = mirror["url"]
                 result = None
