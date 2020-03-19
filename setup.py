@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="COVID19Py", # Replace with your own username
-    version="0.0.1",
+    version="0.1.0",
     author="Konstantinos Kamaropoulos",
     author_email="k@kamaropoulos.com",
     description="Python API Wrapper for tracking Coronavirus (COVID-19, SARS-CoV-2) via https://github.com/ExpDev07/coronavirus-tracker-api",
