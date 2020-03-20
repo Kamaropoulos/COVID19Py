@@ -1,6 +1,13 @@
 # COVID19Py
 Python API Wrapper for tracking Coronavirus (COVID-19, SARS-CoV-2) via https://github.com/ExpDev07/coronavirus-tracker-api
 
+[![Downloads](https://pepy.tech/badge/covid19py)](https://pepy.tech/project/covid19py)
+[![Downloads](https://pepy.tech/badge/covid19py/month)](https://pepy.tech/project/covid19py/month)
+[![Downloads](https://pepy.tech/badge/covid19py/week)](https://pepy.tech/project/covid19py/week)
+[![GPLv3 License](https://img.shields.io/badge/License-GPL%20v3-yellow.svg)](https://opensource.org/licenses/)
+[![HitCount](http://hits.dwyl.com/Kamaropoulos/COVID19Py.svg)](http://hits.dwyl.com/Kamaropoulos/COVID19Py)
+[![GitHub stars](https://img.shields.io/github/stars/Kamaropoulos/COVID19Py.svg?style=social&label=Star)](https://github.com/Kamaropoulos/COVID19Py)
+
 ## Installation
 
 In order install this package, simply run:
