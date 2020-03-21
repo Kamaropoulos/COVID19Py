@@ -44,6 +44,12 @@ locations = covid19.getLocations(timelines=True)
 ```
 to also get timelines.
 
+You can also rank the results by `confirmed`, `deaths` or `recovered`.
+
+```python
+locations = covid19.getLocations(rank_by='recovered')
+```
+
 ### Getting location by country code:
 
 ```python
