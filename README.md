@@ -10,6 +10,16 @@
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 Python API Wrapper for tracking Coronavirus (COVID-19, SARS-CoV-2) via https://github.com/ExpDev07/coronavirus-tracker-api
 
+## About
+
+COVID19Py is a Python wrapper for the [ExpDev07/coronavirus-tracker-api](https://github.com/ExpDev07/coronavirus-tracker-api) REST API.
+It retrieves data directly from [@ExpDev07](https://github.com/ExpDev07)'s backend but it can also be set up to use a different backend.
+
+To achieve this, just pass the URL of the backend as a parameter to the library's constructor:
+```python
+import COVID19Py
+covid19 = COVID19Py.COVID19("https://my-awesome-covid19-backend")
+```
 ## Installation
 
 In order install this package, simply run:
