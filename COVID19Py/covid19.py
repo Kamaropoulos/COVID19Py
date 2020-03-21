@@ -90,10 +90,10 @@ class COVID19(object):
             data = self._request("/v2/locations", {"country_code": country_code})
         return data["locations"]
 
-    def getLocationById(self, id: int):
+    def getLocationById(self, country_id: int):
         """
-        :param id: Id, an int
+        :param country_id: Country Id, an int
         :return: A dictionary with case information for the specified location.
         """
-        data = self._request("/v2/locations/" + str(id))
+        data = self._request("/v2/locations/" + str(country_id))
         return data["location"]
