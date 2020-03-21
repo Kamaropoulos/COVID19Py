@@ -1,6 +1,6 @@
 # COVID19Py
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 Python API Wrapper for tracking Coronavirus (COVID-19, SARS-CoV-2) via https://github.com/ExpDev07/coronavirus-tracker-api
 
@@ -110,6 +110,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 <table>
   <tr>
     <td align="center"><a href="https://kamaropoulos.com"><img src="https://avatars0.githubusercontent.com/u/10237776?v=4" width="100px;" alt=""/><br /><sub><b>Konstantinos Kamaropoulos</b></sub></a><br /><a href="https://github.com/Kamaropoulos/COVID19Py/commits?author=Kamaropoulos" title="Code">💻</a> <a href="https://github.com/Kamaropoulos/COVID19Py/commits?author=Kamaropoulos" title="Documentation">📖</a> <a href="#example-Kamaropoulos" title="Examples">💡</a></td>
+    <td align="center"><a href="http://www.jaroddeweese.com"><img src="https://avatars1.githubusercontent.com/u/32393906?v=4" width="100px;" alt=""/><br /><sub><b>Jarod DeWeese</b></sub></a><br /><a href="https://github.com/Kamaropoulos/COVID19Py/commits?author=jdeweese1" title="Code">💻</a> <a href="https://github.com/Kamaropoulos/COVID19Py/commits?author=jdeweese1" title="Documentation">📖</a></td>
   </tr>
 </table>
 
