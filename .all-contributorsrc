@@ -1,0 +1,26 @@
+{
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "contributors": [
+    {
+      "login": "Kamaropoulos",
+      "name": "Konstantinos Kamaropoulos",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/10237776?v=4",
+      "profile": "https://kamaropoulos.com",
+      "contributions": [
+        "code",
+        "doc",
+        "example"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "projectName": "COVID19Py",
+  "projectOwner": "Kamaropoulos",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "skipCi": true
+}
