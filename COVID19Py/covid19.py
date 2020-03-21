@@ -47,13 +47,24 @@ class COVID19():
         data = self._request("/v2/latest")
         return data["latest"]
     
-    def getLocations(self, timelines=False):
+    def getLocations(self, timelines=False, rank_by=None):
         data = None
         if timelines:
             data = self._request("/v2/locations", {"timelines": str(timelines).lower()})
         else:
             data = self._request("/v2/locations")
-        return data["locations"]
+
+        data = data["locations"]
+        
+        ranking_criteria = ['confirmed', 'deaths', 'recovered']
+        if rank_by is not None:
+            if rank_by not in ranking_criteria:
+                raise ValueError("Invalid ranking criteria. Expected one of: %s" % ranking_criteria)
+
+            ranked = sorted(data, key = lambda i: i['latest'][rank_by],reverse=True)
+            data = ranked
+
+        return data
 
     def getLocationByCountryCode(self, country_code, timelines=False):
         data = None
