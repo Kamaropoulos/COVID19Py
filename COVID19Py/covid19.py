@@ -1,7 +1,8 @@
 from typing import Dict, List
 import requests
 
-class COVID19():
+
+class COVID19(object):
     url = ""
     previousData = None
     latestData = None
@@ -15,8 +16,8 @@ class COVID19():
         if self.latestData:
             self.previousData = self.latestData
         self.latestData = {
-            "latest":latest,
-            "locations":locations
+            "latest": latest,
+            "locations": locations
         }
 
     def _request(self, endpoint, params=None):
@@ -71,7 +72,7 @@ class COVID19():
             if rank_by not in ranking_criteria:
                 raise ValueError("Invalid ranking criteria. Expected one of: %s" % ranking_criteria)
 
-            ranked = sorted(data, key = lambda i: i['latest'][rank_by],reverse=True)
+            ranked = sorted(data, key=lambda i: i['latest'][rank_by], reverse=True)
             data = ranked
 
         return data
