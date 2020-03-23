@@ -9,7 +9,8 @@
 [![HitCount](http://hits.dwyl.com/Kamaropoulos/COVID19Py.svg)](http://hits.dwyl.com/Kamaropoulos/COVID19Py)
 [![GitHub stars](https://img.shields.io/github/stars/Kamaropoulos/COVID19Py.svg?style=social&label=Star)](https://github.com/Kamaropoulos/COVID19Py)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
-Python API Wrapper for tracking Coronavirus (COVID-19, SARS-CoV-2) via https://github.com/ExpDev07/coronavirus-tracker-api
+A tiny Python package for easy access to up-to-date Coronavirus (COVID-19, SARS-CoV-2) cases data.
+<!-- Python API Wrapper for tracking Coronavirus (COVID-19, SARS-CoV-2) via https://github.com/ExpDev07/coronavirus-tracker-api -->
 
 ## About
 

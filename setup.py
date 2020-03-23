@@ -8,7 +8,7 @@ setuptools.setup(
     version="0.2.0",
     author="Konstantinos Kamaropoulos",
     author_email="k@kamaropoulos.com",
-    description="Python API Wrapper for tracking Coronavirus (COVID-19, SARS-CoV-2) via https://github.com/ExpDev07/coronavirus-tracker-api",
+    description="A tiny Python package for easy access to up-to-date Coronavirus (COVID-19, SARS-CoV-2) cases data.",
     license = "GPLv3",
     long_description=long_description,
     long_description_content_type="text/markdown",
