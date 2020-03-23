@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="COVID19Py", # Replace with your own username
-    version="0.2.0",
+    version="0.3.0",
     author="Konstantinos Kamaropoulos",
     author_email="k@kamaropoulos.com",
     description="A tiny Python package for easy access to up-to-date Coronavirus (COVID-19, SARS-CoV-2) cases data.",
