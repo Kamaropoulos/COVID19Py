@@ -38,6 +38,15 @@ import COVID19Py
 covid19 = COVID19Py.COVID19()
 ```
 
+### Choosing a data source
+
+COVID19Py supports the retrieval of data from multiple data sources.
+To choose a specific data source, simply pass it as a parameter to the library's constructor:
+```python
+covid19 = COVID19Py.COVID19(data_source="csbs")
+```
+For more details about the available data sources, please check the [API's documentation](https://github.com/ExpDev07/coronavirus-tracker-api/blob/master/README.md#picking-data-source).
+
 ### Getting latest amount of total confirmed cases, deaths, and recoveries:
 
 ```python
