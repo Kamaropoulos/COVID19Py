@@ -4,11 +4,17 @@ import requests
 
 class COVID19(object):
     url = ""
+    data_source = ""
     previousData = None
     latestData = None
+    _valid_data_sources = []
 
-    def __init__(self, url="https://coronavirus-tracker-api.herokuapp.com"):
+    def __init__(self, url="https://coronavirus-tracker-api.herokuapp.com", data_source='jhu'):
         self.url = url
+        self._valid_data_sources = self._getSources()
+        if data_source not in self._valid_data_sources:
+            raise ValueError("Invalid data source. Expected one of: %s" % self._valid_data_sources)
+        self.data_source = data_source
 
     def _update(self, timelines):
         latest = self.getLatest()
@@ -20,8 +26,15 @@ class COVID19(object):
             "locations": locations
         }
 
+    def _getSources(self):
+        response = requests.get(self.url + "/v2/sources")
+        response.raise_for_status()
+        return response.json()["sources"]
+
     def _request(self, endpoint, params=None):
-        response = requests.get(self.url + endpoint, params)
+        if params is None:
+            params = {}
+        response = requests.get(self.url + endpoint, {**params, "source":self.data_source})
         response.raise_for_status()
         return response.json()
 
