@@ -1,3 +1,4 @@
+# First party modules
 import COVID19Py
 
 covid19 = COVID19Py.COVID19()

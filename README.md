@@ -20,6 +20,7 @@ It retrieves data directly from [@ExpDev07](https://github.com/ExpDev07)'s backe
 To achieve this, just pass the URL of the backend as a parameter to the library's constructor:
 ```python
 import COVID19Py
+
 covid19 = COVID19Py.COVID19("https://my-awesome-covid19-backend")
 ```
 ## Installation
@@ -36,6 +37,7 @@ To use COVID19Py, you first need to import the package and then create a new ins
 
 ```python
 import COVID19Py
+
 covid19 = COVID19Py.COVID19()
 ```
 
@@ -70,7 +72,7 @@ to also get timelines.
 You can also rank the results by `confirmed`, `deaths` or `recovered`.
 
 ```python
-locations = covid19.getLocations(rank_by='recovered')
+locations = covid19.getLocations(rank_by="recovered")
 ```
 
 ### Getting location by country code:
