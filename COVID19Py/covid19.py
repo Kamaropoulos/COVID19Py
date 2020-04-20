@@ -103,6 +103,54 @@ class COVID19(object):
             data = self._request("/v2/locations", {"country_code": country_code})
         return data["locations"]
 
+    def getLocationByProvince(self, province, country_code=None, timelines=False) -> List[Dict]:
+        """
+        :param country_code: String denoting the ISO 3166-1 alpha-2 code (https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) of the country
+        :param province: String specifying the province to be retrieved in a given country_code
+        :param timelines: Whether timeline information should be returned as well.
+        :return: A list of areas that correspond to the country_code + province. If the country_code is invalid, it returns an empty list.
+        """
+
+        # Not all data sources provide province lookup -- just nyt for now?
+        payload = {}
+        if country_code:
+            payload["country_code"] = country_code
+        if timelines:
+            payload["timelines"] = str(timelines).lower()
+        if province:
+            payload["province"] = str(province.lower())
+
+        data = self._request("/v2/locations", payload)
+        #TODO handle 404?
+
+        return data["locations"]
+
+    def getLocationByCounty(self, county, country_code=None, province=None, timelines=False) -> List[Dict]:
+        """
+        :param country_code: String denoting the ISO 3166-1 alpha-2 code (https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) of the country
+        :param province: String specifying the province to be retrieved in a given country_code
+        :param county: String specifying the county to return location data for
+        :param timelines: Whether timeline information should be returned as well.
+        :return: A list of areas that correspond to the specified county. country_code + province can be supplied as optional arguments. country_code + province + county. If invalid, it returns an empty list.
+        """
+
+        # Not all data sources provide province lookup -- just nyt for now?
+        payload = {}
+        if country_code:
+            payload["country_code"] = country_code
+        if timelines:
+            payload["timelines"] = str(timelines).lower()
+        if province:
+            payload["province"] = str(province.lower())
+        if county:
+            payload["county"] = str(county.lower())
+
+        data = self._request("/v2/locations", payload)
+        #TODO handle 404?
+
+        return data["locations"]
+
+
     def getLocationById(self, country_id: int):
         """
         :param country_id: Country Id, an int

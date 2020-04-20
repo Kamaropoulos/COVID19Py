@@ -12,7 +12,7 @@ setuptools.setup(
     license = "GPLv3",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/Kamaropoulos/covid19py",
+    url="https://github.com/technicalfowler/covid19py",
     packages=["COVID19Py"],
     keywords = ['covid19', 'coronavirus', 'api', 'covid-19', 'wrapper'],
     classifiers=[
