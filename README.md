@@ -14,8 +14,8 @@ A tiny Python package for easy access to up-to-date Coronavirus (COVID-19, SARS-
 
 ## About
 
-COVID19Py is a Python wrapper for the [ExpDev07/coronavirus-tracker-api](https://github.com/ExpDev07/coronavirus-tracker-api) REST API.
-It retrieves data directly from [@ExpDev07](https://github.com/ExpDev07)'s backend but it can also be set up to use a different backend.
+COVID19Py is a Python wrapper made to be compatible with [ExpDev07/coronavirus-tracker-api](https://github.com/ExpDev07/coronavirus-tracker-api) REST API.
+It retrieves data directly from an instance of [@ExpDev07](https://covid-tracker-us.herokuapp.com/)'s backend but it can also be set up to use a different backend.
 
 To achieve this, just pass the URL of the backend as a parameter to the library's constructor:
 ```python
