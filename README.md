@@ -119,6 +119,14 @@ changes = covid19.getLatestChanges()
     "recovered": 1024
 }
 ```
+## Contributing
+
+You will need to fork this repository onto your own GitHub account, then clone the repo to your local machine.
+
+In the project directory, you will need to make sure the required packages are installed. To install requirements from the Pipfile, run a command like the following, which may depend on how you have package management set up:
+```bash
+pipenv install
+```
 
 ## Contributors ✨
 
