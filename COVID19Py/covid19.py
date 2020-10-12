@@ -9,7 +9,7 @@ class COVID19(object):
     latestData = None
     _valid_data_sources = []
 
-    def __init__(self, url="https://coronavirus-tracker-api.herokuapp.com", data_source='jhu'):
+    def __init__(self, url="https://covid-tracker-us.herokuapp.com", data_source='jhu'):
         self.url = url
         self._valid_data_sources = self._getSources()
         if data_source not in self._valid_data_sources:
