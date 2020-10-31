@@ -38,11 +38,9 @@ class COVID19(object):
                     # We found a mirror that worked just fine, let's stick with it
                     break
 
-                # None of the mirrors worked. For now we can roll back to the default
-                # URL and let the error it causes get thrown.
-                self.url = url
-                # TODO: This should be handled as a unique error and provide a good
-                #       explanation for it as it can be confusing for users.
+                # None of the mirrors worked. Raise an error to inform the user.
+                raise RuntimeError("No available API mirror was found.")
+
         else:
             self.url = url
 
