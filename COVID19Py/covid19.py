@@ -1,6 +1,6 @@
 from typing import Dict, List
 import requests
-
+import json
 
 class COVID19(object):
     url = ""
@@ -9,8 +9,39 @@ class COVID19(object):
     latestData = None
     _valid_data_sources = []
 
+    mirrors_source = "https://raw.github.com/Kamaropoulos/COVID19Py/master/mirrors.json"
+    mirrors = None
+
     def __init__(self, url="https://covid-tracker-us.herokuapp.com", data_source='jhu'):
-        self.url = url
+        # Load mirrors
+        response = requests.get(self.mirrors_source)
+        response.raise_for_status()
+        self.mirrors = response.json()
+
+        # Try to get sources as a test
+        for mirror in self.mirrors:
+            # Set URL of mirror
+            self.url = mirror["url"]
+            result = None
+            try:
+                result = self._getSources()
+            except Exception as e:
+                # URL did not work, reset it and move on
+                self.url = ""
+                continue
+            
+
+            # TODO: Should have a better health-check, this is way too hacky...
+            if "jhu" in result:
+                # We found a mirror that worked just fine, let's stick with it
+                break
+
+            # None of the mirrors worked. For now we can roll back to the default
+            # URL and let the error it causes get thrown.
+            self.url = url
+            # TODO: This should be handled as a unique error and provide a good
+            #       explanation for it as it can be confusing for users.
+
         self._valid_data_sources = self._getSources()
         if data_source not in self._valid_data_sources:
             raise ValueError("Invalid data source. Expected one of: %s" % self._valid_data_sources)
