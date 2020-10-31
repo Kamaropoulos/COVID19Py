@@ -1,0 +1,14 @@
+[
+    {
+        "url": "https://covid-tracker-us.herokuapp.com/",
+        "provider": ""
+    },
+    {
+        "url": "https://cvtapi.nl",
+        "provider": "https://github.com/Toxyl"
+    },
+    {
+        "url": "http://covid19-api.kamaropoulos.com/",
+        "provider": "https://github.com/Kamaropoulos"
+    }
+]
