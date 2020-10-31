@@ -3,6 +3,7 @@ import requests
 import json
 
 class COVID19(object):
+    default_url = "https://covid-tracker-us.herokuapp.com"
     url = ""
     data_source = ""
     previousData = None
@@ -13,34 +14,37 @@ class COVID19(object):
     mirrors = None
 
     def __init__(self, url="https://covid-tracker-us.herokuapp.com", data_source='jhu'):
-        # Load mirrors
-        response = requests.get(self.mirrors_source)
-        response.raise_for_status()
-        self.mirrors = response.json()
+        # Skip mirror checking if custom url was passed
+        if url == self.default_url:
+            # Load mirrors
+            response = requests.get(self.mirrors_source)
+            response.raise_for_status()
+            self.mirrors = response.json()
 
-        # Try to get sources as a test
-        for mirror in self.mirrors:
-            # Set URL of mirror
-            self.url = mirror["url"]
-            result = None
-            try:
-                result = self._getSources()
-            except Exception as e:
-                # URL did not work, reset it and move on
-                self.url = ""
-                continue
-            
+            # Try to get sources as a test
+            for mirror in self.mirrors:
+                # Set URL of mirror
+                self.url = mirror["url"]
+                result = None
+                try:
+                    result = self._getSources()
+                except Exception as e:
+                    # URL did not work, reset it and move on
+                    self.url = ""
+                    continue
 
-            # TODO: Should have a better health-check, this is way too hacky...
-            if "jhu" in result:
-                # We found a mirror that worked just fine, let's stick with it
-                break
+                # TODO: Should have a better health-check, this is way too hacky...
+                if "jhu" in result:
+                    # We found a mirror that worked just fine, let's stick with it
+                    break
 
-            # None of the mirrors worked. For now we can roll back to the default
-            # URL and let the error it causes get thrown.
+                # None of the mirrors worked. For now we can roll back to the default
+                # URL and let the error it causes get thrown.
+                self.url = url
+                # TODO: This should be handled as a unique error and provide a good
+                #       explanation for it as it can be confusing for users.
+        else:
             self.url = url
-            # TODO: This should be handled as a unique error and provide a good
-            #       explanation for it as it can be confusing for users.
 
         self._valid_data_sources = self._getSources()
         if data_source not in self._valid_data_sources:
