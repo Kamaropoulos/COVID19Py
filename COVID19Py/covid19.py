@@ -72,6 +72,10 @@ class COVID19(object):
         return response.json()
 
     def getAll(self, timelines=False):
+        '''
+        :param timelines: Whether timeline information should be returned as well.
+        :return all the data
+        '''
         self._update(timelines)
         return self.latestData
 
