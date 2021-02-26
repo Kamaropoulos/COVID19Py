@@ -80,6 +80,9 @@ class COVID19(object):
         return self.latestData
 
     def getLatestChanges(self):
+        '''
+        :return changes of data since the last time we requested them
+        '''
         changes = None
         if self.previousData:
             changes = {
