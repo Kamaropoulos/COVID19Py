@@ -1,4 +1,4 @@
-import COVID19Py
+from COVID19Py import covid19
 
 covid19 = COVID19Py.COVID19()
 

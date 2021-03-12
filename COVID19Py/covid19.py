@@ -67,7 +67,7 @@ class COVID19(object):
     def _request(self, endpoint, params=None):
         if params is None:
             params = {}
-        response = requests.get(self.url + endpoint, {**params, "source":self.data_source})
+        response = requests.get(self.url + endpoint, {*params, "source":self.data_source}) #syntax error fixed
         response.raise_for_status()
         return response.json()
 
