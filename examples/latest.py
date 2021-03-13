@@ -1,5 +1,11 @@
 import COVID19Py
+import CaseByCountry
+case = COVID19Py.COVID19()
 
-covid19 = COVID19Py.COVID19()
+print(case.getLatest())
+print(case.getLatestChanges())
+#print(case.getLocationByCountryCode("US"))
 
-print(covid19.getLatest())
+
+country = CaseByCountry(case)
+print(country.getLocationByCountryCode("US"))

@@ -122,7 +122,7 @@ class COVID19(object):
             data = ranked
 
         return data
-
+'''
     def getLocationByCountryCode(self, country_code, timelines=False) -> List[Dict]:
         """
         :param country_code: String denoting the ISO 3166-1 alpha-2 code (https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) of the country
@@ -156,3 +156,4 @@ class COVID19(object):
         """
         data = self._request("/v2/locations/" + str(country_id))
         return data["location"]
+'''
