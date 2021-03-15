@@ -169,8 +169,11 @@ class COVID19(object):
         :return: A list of areas that correspond to the country name. If the country is invalid, it returns an empty list.
         """
         data = None
-        if timelines:
-            data = self._request("/v2/locations", {"country_id": country_id, "timelines": str(timelines).lower()})
+        if country_id > 0:
+            if timelines:
+                data = self._request("/v2/locations", {"country_id": country_id, "timelines": str(timelines).lower()})
+            else:
+                data = self._request("/v2/locations", {"country_id": country_id})
+            return data["locations"]
         else:
-            data = self._request("/v2/locations", {"country_id": country_id})
-        return data["locations"]
+            raise ValueError("Invalid country id. Not Expected zero or negative")
