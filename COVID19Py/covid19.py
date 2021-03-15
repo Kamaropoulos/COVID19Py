@@ -123,6 +123,7 @@ class COVID19(object):
 
         return data
 
+    #use for getting country by code
     def getLocationByCountryCode(self, country_code, timelines=False) -> List[Dict]:
         """
         :param country_code: String denoting the ISO 3166-1 alpha-2 code (https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) of the country
@@ -136,6 +137,7 @@ class COVID19(object):
             data = self._request("/v2/locations", {"country_code": country_code})
         return data["locations"]
     
+    #use for getting location by country
     def getLocationByCountry(self, country, timelines=False) -> List[Dict]:
         """
         :param country: String denoting name of the country
@@ -149,6 +151,8 @@ class COVID19(object):
             data = self._request("/v2/locations", {"country": country})
         return data["locations"]
 
+
+    #Use for getting location by country id
     def getLocationById(self, country_id: int):
         """
         :param country_id: Country Id, an int
