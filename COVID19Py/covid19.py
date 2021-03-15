@@ -173,8 +173,7 @@ class COVID19(object):
             if timelines:
                 data = self._request("/v2/locations", {"country_id": country_id, "timelines": str(timelines).lower()})
             else:
-                data = self._request("/v2/locations", {"country_id": country_id})
-            
+                data = self._request("/v2/locations", {"country_id": country_id})    
         else:
             raise ValueError("Invalid country id. Not Expected zero or negative")
 
