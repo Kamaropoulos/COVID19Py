@@ -178,3 +178,15 @@ class COVID19(object):
             raise ValueError("Invalid country id. Not Expected zero or negative")
 
         return data["locations"]
+
+    #Insertion Aggregate
+    def saveCountry(self, country_code, country):
+        """
+        :param country: String denoting name of the country
+        :param country_code: String denoting name of the country_code
+        :return: A dictionary with case information for the specified location.
+        """
+        data = self._request("/v2/latest")
+        country_data = {"country": country, "country_code": country_code}
+        data["location"].append(country_data)
+        return data["location"]
