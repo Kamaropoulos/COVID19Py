@@ -9,7 +9,7 @@ class COVID19(object):
     previousData = None
     latestData = None
     _valid_data_sources = []
- #new 
+ #new nihao ma
 domain_pattern = []
 
     mirrors_source = "https://raw.github.com/Kamaropoulos/COVID19Py/master/mirrors.json"
