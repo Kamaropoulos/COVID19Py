@@ -174,6 +174,8 @@ class COVID19(object):
                 data = self._request("/v2/locations", {"country_id": country_id, "timelines": str(timelines).lower()})
             else:
                 data = self._request("/v2/locations", {"country_id": country_id})
-            return data["locations"]
+            
         else:
             raise ValueError("Invalid country id. Not Expected zero or negative")
+
+        return data["locations"]
