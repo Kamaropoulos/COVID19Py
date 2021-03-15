@@ -184,9 +184,22 @@ class COVID19(object):
         """
         :param country: String denoting name of the country
         :param country_code: String denoting name of the country_code
-        :return: A dictionary with case information for the specified location.
+        :return: A dictionary with New case information for the specified location.
         """
         data = self._request("/v2/latest")
         country_data = {"country": country, "country_code": country_code}
         data["location"].append(country_data)
+        return data["location"]
+
+    #Updation Aggregate
+    def updateCountry(self, country_id: int,country_code, country):
+        """
+        :param country_id: Country Id, an int
+        :param country: String denoting name of the country
+        :param country_code: String denoting name of the country_code
+        :return: Updated dictionary with case information for the specified location.
+        """
+        data = getLocationById()
+        country_data = {"country": country, "country_code": country_code}
+        data["location"] = country_data
         return data["location"]
