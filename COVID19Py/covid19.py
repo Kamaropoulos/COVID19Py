@@ -1,7 +1,7 @@
 from typing import Dict, List
 import requests
 import json
-location = location.location()
+
 
 class COVID19(object):
     default_url = "https://covid-tracker-us.herokuapp.com"
