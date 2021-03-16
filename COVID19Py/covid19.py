@@ -160,79 +160,47 @@ class COVID19(object):
         data = self._request("/v2/locations/" + str(country_id))
         return data["location"]
     
-    def getMultipleCountries(self, name: str, typeCall = 0, countries = [], time_line = False):
+    def getAlternateSource(self, name, url="https://covid-tracker-us.herokuapp.com", data_source='jhu'):
         """
-        :param name: A unique (within dictionary user_lists) identifying name for a list of countries
-            If name is not unique, the old list of countries will be replaced with parameter countries[] or use 
-            the original country list if no list is passed or an empty list is passed.
-            If a new list is passed to an existing object it must retain the original type ie. codes, names or ids
-        :param type: Integer of value 0, 1 or 2 corresponding to the type of identifying values 
-            within parameter countries where: 
-            0 = is a list of codes type string as seen in getLocationByCountryCode()
-            1 = is a list of names type string as seen in getLocationByCountry()
-            2 = is a list of id's type int as seen in getLocationById()
-        :param countries: A list of countries with values corresponding to the type entered   
+        :param name: A unique (within dictionary alternate_sources) identifying name for an alternate instance
+        of COVID19Py that uses a different URL or data source. If the name is not unique then the original instance
+        of this class is retrieved and any URL or data source passed is ignored.
+        :param url: The url of the API you wish COVID19Py to use
+        :param data_source: The data source you wish to retreive information from through COVID19Py
         :param timelines: Whether timeline information should be returned as well.   
-        :return: A list of areas that corresponding to countries passed in parameter countries. 
-        If a value in countries is invalid, it returns an empty list. If parameter type is invalid an empty list is returned.
+        :return: An instance of COVID19Py using the url and data_source from passed parameters.
+            If there are any issues with either the URL or data source exceptions are handled
+            as if you are creating a new instance of COVID19Py
         """
+        alt = None
+        result = None
         
-        check = None
-        check = self.user_lists.get(name)
-        #If the passed name is not present in dictionary create new entry
-        #else use existing entry
-        if check is None:
-            self.user_lists.update({name: COUNTRIES(self)})
-            data = []
-            if typeCall == 0:
-                data = self.user_lists.get(name)._getCountriesByCode(time_line, countries)
-            elif typeCall == 1:
-                data = self.user_lists.get(name)._getCountriesByName(time_line, countries)
-            elif typeCall == 2:
-                data = self.user_lists.get(name)._getCountriesById(countries)
+        alt = self.alternate_sources.get(name)
+        
+        #Check if an alternate source exists else create a new one
+        if alt is None:
+            self.alternate_sources.update({name: ALT_SOURCES(url, data_source)})
+            alt = self.alternate_sources.get(name)
+            result = alt._accessAlt()
         else:
-            if check.typeCall == 0:
-                data = self.user_lists.get(name)._getCountriesByCode(time_line, countries)
-            elif check.typeCall == 1:
-                data = self.user_lists.get(name)._getCountriesByName(time_line, countries)
-            elif check.typeCall == 2:
-                data = self.user_lists.get(name)._getCountriesById(countries)
- 
-        return data
+            result = alt._accessAlt()
+                
+        return result
     
             
-class COUNTRIES(object):
+class ALT_SOURCES(object):
     
-    covid_obj = None
-    country_list = []
-    typeCall = 0
+    url = ""
+    data_source = ""
+    covid19_obj = None
     
-    def __init__(self, covid19_obj):
-        self.covid_obj = covid19_obj
+    #We attempt to create a COVID19Py object with the passed url and data_source before
+    #setting the class values. This is so we can use the default url if the user passed
+    #an invalid url. This is handled in COVID19Py.__init__
+    def __init__(self, url, data_source):
+        self.covid19_obj = COVID19(url, data_source)
+        self.url = self.covid19_obj.url 
+        self.data_source = self.covid19_obj.data_source
     
-    #If the instance is called multiple times every new call clear country_list
-    #and use the newly passed parameter country_list unless the list is empty or not present
-    #in this case use the original country_list. Applies to all get methods.
-    def _getCountriesByCode(self, timelines = False, country_list = []):
-        self.typeCall = 0
-        if country_list != []:
-            self.country_list.clear()
-        for code in country_list:
-           self.country_list.append(self.covid_obj.getLocationByCountryCode(code, timelines))
-        return self.country_list
-    
-    def _getCountriesByName(self, timelines = False, country_list = []):
-        self.typeCall = 1
-        if country_list != []:
-            self.country_list.clear()
-        for name in country_list:
-            self.country_list.append(self.covid_obj.getLocationByCountry(name, timelines))
-        return self.country_list
-    
-    def _getCountriesById(self, country_list = []):
-        self.typeCall = 2
-        if country_list != []:
-            self.country_list.clear()
-        for i in country_list:
-            self.country_list.append(self.covid_obj.getLocationById(i))
-        return self.country_list
+    def _accessAlt(self):
+        return self.covid19_obj
