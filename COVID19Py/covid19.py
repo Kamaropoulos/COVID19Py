@@ -156,11 +156,3 @@ class COVID19(object):
         """
         data = self._request("/v2/locations/" + str(country_id))
         return data["location"]
-
-     def getLocationByIdTEST(self, country_id: int):
-        """
-        :param country_id: Country Id, an int
-        :return: A dictionary with case information for the specified location.
-        """
-        data = self._request("/v2/locations/" + str(country_id))
-        return data["location"] 
