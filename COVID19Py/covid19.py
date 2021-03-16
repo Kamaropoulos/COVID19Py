@@ -79,9 +79,9 @@ class COVID19(object):
         changes = None
         if self.previousData:
             changes = {
-                "confirmed": self.latestData["latest"]["confirmed"] - self.latestData["latest"]["confirmed"],
-                "deaths": self.latestData["latest"]["deaths"] - self.latestData["latest"]["deaths"],
-                "recovered": self.latestData["latest"]["recovered"] - self.latestData["latest"]["recovered"],
+                "confirmed": self.latestData["latest"]["confirmed"] - self.previousData["latest"]["confirmed"],
+                "deaths": self.latestData["latest"]["deaths"] - self.previousData["latest"]["deaths"],
+                "recovered": self.latestData["latest"]["recovered"] - self.previousData["latest"]["recovered"],
             }
         else:
             changes = {
