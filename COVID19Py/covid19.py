@@ -1,6 +1,7 @@
 from typing import Dict, List
 import requests
 import json
+location = location.location()
 
 class COVID19(object):
     default_url = "https://covid-tracker-us.herokuapp.com"
@@ -9,8 +10,6 @@ class COVID19(object):
     previousData = None
     latestData = None
     _valid_data_sources = []
- #new nihao ma
-domain_pattern = []
 
     mirrors_source = "https://raw.github.com/Kamaropoulos/COVID19Py/master/mirrors.json"
     mirrors = None
@@ -158,3 +157,6 @@ domain_pattern = []
         """
         data = self._request("/v2/locations/" + str(country_id))
         return data["location"]
+    
+    
+    
