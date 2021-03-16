@@ -5,7 +5,7 @@ class RequestData:
         self.url = entityURL_uid
         self.data_source = data_source
         self.params = None
-        if params != None:
+        if params is None:
             self.params = params
 
     def requestData(self):
