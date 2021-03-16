@@ -1,6 +1,7 @@
 from typing import Dict, List
 import requests
 import json
+import url 
 
 
 class COVID19(object):
