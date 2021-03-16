@@ -8,11 +8,14 @@ class COVID19(object):
     data_source = ""
     previousData = None
     latestData = None
-    _valid_data_sources = []
-
+    _valid_data_sources = [] 
+    user_lists = {}
+    alternate_sources = {}
+    
     mirrors_source = "https://raw.github.com/Kamaropoulos/COVID19Py/master/mirrors.json"
     mirrors = None
 
+    
     def __init__(self, url="https://covid-tracker-us.herokuapp.com", data_source='jhu'):
         # Skip mirror checking if custom url was passed
         if url == self.default_url:
@@ -156,3 +159,83 @@ class COVID19(object):
         """
         data = self._request("/v2/locations/" + str(country_id))
         return data["location"]
+    
+    def getMultipleCountries(self, name: str, type = 0, countries = [], time_line = False):
+        """
+        :param name: A unique (within dictionary user_lists) identifying name for a list of countries
+            If name is not unique, the old list of countries will be replaced with parameter countries[] or use 
+            the original country list if no list is passed or an empty list is passed.
+            If a new list is passed to an existing object it must retain the original type ie. codes, names or ids
+        :param type: Integer of value 0, 1 or 2 corresponding to the type of identifying values 
+            within parameter countries where: 
+            0 = is a list of codes type string as seen in getLocationByCountryCode()
+            1 = is a list of names type string as seen in getLocationByCountry()
+            2 = is a list of id's type int as seen in getLocationById()
+        :param countries: A list of countries with values corresponding to the type entered   
+        :param timelines: Whether timeline information should be returned as well.   
+        :return: A list of areas that corresponding to countries passed in parameter countries. 
+        If a value in countries is invalid, it returns an empty list. If parameter type is invalid an empty list is returned.
+        """
+        
+        check = None
+        check = self.user_lists.get(name)
+        #If the passed name is not present in dictionary create new entry
+        #else use existing entry
+        if check == None:
+            self.user_lists.update({name: COUNTRIES(self)})
+            data = []
+            if type == 0:
+                data = self.user_lists.get(name)._getCountriesByCode(time_line, countries)
+            elif type == 1:
+                data = self.user_lists.get(name)._getCountriesByName(time_line, countries)
+            elif type == 2:
+                data = self.user_lists.get(name)._getCountriesById(countries)
+        else:
+            if check.type == 0:
+                data = self.user_lists.get(name)._getCountriesByCode(time_line, countries)
+            elif check.type == 1:
+                data = self.user_lists.get(name)._getCountriesByName(time_line, countries)
+            elif check.type == 2:
+                data = self.user_lists.get(name)._getCountriesById(countries)
+ 
+        return data
+    
+            
+class COUNTRIES(object):
+    
+    covid_obj = None
+    country_list = []
+    type = 0
+    
+    def __init__(self, covid19_obj):
+        self.covid_obj = covid19_obj
+    
+    #If the instance is called multiple times every new call clear country_list
+    #and use the newly passed parameter country_list unless the list is empty or not present
+    #in this case use the original country_list. Applies to all get methods.
+    def _getCountriesByCode(self, timelines = False, country_list = []):
+        self.type = 0
+        if country_list != []:
+            self.country_list.clear()
+        for code in country_list:
+           self.country_list.append(self.covid_obj.getLocationByCountryCode(code, timelines))
+        return self.country_list
+    
+    def _getCountriesByName(self, timelines = False, country_list = []):
+        self.type = 1
+        if country_list != []:
+            self.country_list.clear()
+        for name in country_list:
+            self.country_list.append(self.covid_obj.getLocationByCountry(name, timelines))
+        return self.country_list
+    
+    def _getCountriesById(self, country_list = []):
+        self.type = 2
+        if country_list != []:
+            self.country_list.clear()
+        for id in country_list:
+            self.country_list.append(self.covid_obj.getLocationById(id))
+        return self.country_list
+
+
+    
