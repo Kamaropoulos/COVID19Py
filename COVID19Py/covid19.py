@@ -160,7 +160,7 @@ class COVID19(object):
         data = self._request("/v2/locations/" + str(country_id))
         return data["location"]
     
-    def getMultipleCountries(self, name: str, type = 0, countries = [], time_line = False):
+    def getMultipleCountries(self, name: str, typeCall = 0, countries = [], time_line = False):
         """
         :param name: A unique (within dictionary user_lists) identifying name for a list of countries
             If name is not unique, the old list of countries will be replaced with parameter countries[] or use 
@@ -181,21 +181,21 @@ class COVID19(object):
         check = self.user_lists.get(name)
         #If the passed name is not present in dictionary create new entry
         #else use existing entry
-        if check == None:
+        if check is None:
             self.user_lists.update({name: COUNTRIES(self)})
             data = []
-            if type == 0:
+            if typeCall == 0:
                 data = self.user_lists.get(name)._getCountriesByCode(time_line, countries)
-            elif type == 1:
+            elif typeCall == 1:
                 data = self.user_lists.get(name)._getCountriesByName(time_line, countries)
-            elif type == 2:
+            elif typeCall == 2:
                 data = self.user_lists.get(name)._getCountriesById(countries)
         else:
-            if check.type == 0:
+            if check.typeCall == 0:
                 data = self.user_lists.get(name)._getCountriesByCode(time_line, countries)
-            elif check.type == 1:
+            elif check.typeCall == 1:
                 data = self.user_lists.get(name)._getCountriesByName(time_line, countries)
-            elif check.type == 2:
+            elif check.typeCall == 2:
                 data = self.user_lists.get(name)._getCountriesById(countries)
  
         return data
@@ -205,7 +205,7 @@ class COUNTRIES(object):
     
     covid_obj = None
     country_list = []
-    type = 0
+    typeCall = 0
     
     def __init__(self, covid19_obj):
         self.covid_obj = covid19_obj
@@ -214,7 +214,7 @@ class COUNTRIES(object):
     #and use the newly passed parameter country_list unless the list is empty or not present
     #in this case use the original country_list. Applies to all get methods.
     def _getCountriesByCode(self, timelines = False, country_list = []):
-        self.type = 0
+        self.typeCall = 0
         if country_list != []:
             self.country_list.clear()
         for code in country_list:
@@ -222,7 +222,7 @@ class COUNTRIES(object):
         return self.country_list
     
     def _getCountriesByName(self, timelines = False, country_list = []):
-        self.type = 1
+        self.typeCall = 1
         if country_list != []:
             self.country_list.clear()
         for name in country_list:
@@ -230,12 +230,11 @@ class COUNTRIES(object):
         return self.country_list
     
     def _getCountriesById(self, country_list = []):
-        self.type = 2
+        self.typeCall = 2
         if country_list != []:
             self.country_list.clear()
-        for id in country_list:
-            self.country_list.append(self.covid_obj.getLocationById(id))
+        for i in country_list:
+            self.country_list.append(self.covid_obj.getLocationById(i))
         return self.country_list
-
 
     
