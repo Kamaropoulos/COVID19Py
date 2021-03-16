@@ -5,47 +5,42 @@ import json
 
 
 class User:
-    def __init__(self, user_id: str, covid_source: Covid19DataSource):
-        # to ensure every data source is associated with just one unique user
-        if covid_source.user_id == "":
-            covid_source.user_id = user_id
+    # this class allows users to compare a list of data sources
+    # TO DO: populate the class with methods to compare (using those from COVID19 class)
+    # see example methods below
+
+    def __init__(self, user_id: str, sources: List[Covid19DataSource]):
+        for source in sources:
+            if source.user_id == "":
+                source.user_id = user_id
+            else:
+                sources.remove(source)  # remove source from list if the source is used by another User object
+
+        if len(sources) > 1:  # make sure list has at least 2 data sources
+            self.sources = sources
+            self.user_id = user_id
         else:
-            raise ValueError("this source is already used by user with id " + covid_source.user_id)
-        self.id = user_id
-        self.source = covid_source
+            raise ValueError("list provided does not have more than one data source")
 
-    def getAll(self, timelines=False):
-        return self.source.getAll(timelines)
+    # if you want to compare the number of locations in each source
+    # and from here choose the one with the most locations
+    def getNumberOfLocations(self):
+        for source in self.sources:
+            print("Source with url: " + source.url + "has " + str(len(source.getLocations())) + " locations")
 
-    def getLatestChanges(self):
-        return self.source.getLatestChanges()
+    # search all data sources until one retrieves the data needed
+    def getDataByCountryName(self, country) -> List[Dict]:
+        for source in self.sources:
+            if source.getLocationByCountry(country):  # means return is not empty list so country found
+                return source.getLocationByCountry(country)
+        return []  # none of the sources had the country being looked for
 
-    def getLatest(self) -> List[Dict[str, int]]:
-        return self.source.getLatest()
-
-    def getLocations(self, timelines=False, rank_by: str = None) -> List[Dict]:
-        return self.source.getLocations(timelines, rank_by)
-
-    def getLocationByCountryCode(self, country_code, timelines=False) -> List[Dict]:
-        return self.source.getLocationByCountryCode(country_code, timelines)
-
-    def getLocationByCountry(self, country, timelines=False) -> List[Dict]:
-        return self.source.getLocationByCountry(country, timelines)
-
-    def getLocationById(self, country_id):
-        return self.source.getLocationById(country_id)
-
-    def changeSource(self, new_source: Covid19DataSource):
-        self.source = new_source
-
-    def getNumberOfLocations(self) -> int:
-        return len(self.source.getLocations())
-
-    def sourceURL(self) -> str:
-        return self.source.url
-
-    def dataSourceName(self) -> str:
-        return self.source.data_source
+    # search all data sources until one retrieves the data needed
+    def getDataByCountryCode(self, country_code) -> List[Dict]:
+        for source in self.sources:
+            if source.getLocationByCountryCode(country_code):  # means return is not empty list so country found
+                return source.getLocationByCountryCode(country_code)
+        return []  # none of the sources had the country being looked for
 
 
 class Covid19DataSource(object):
