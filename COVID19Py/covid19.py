@@ -236,5 +236,3 @@ class COUNTRIES(object):
         for i in country_list:
             self.country_list.append(self.covid_obj.getLocationById(i))
         return self.country_list
-
-    
