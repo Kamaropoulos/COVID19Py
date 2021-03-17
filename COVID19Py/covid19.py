@@ -177,9 +177,9 @@ class Location(object):
 
 
 # Testing
-def main():
-    tracker = COVID19(data_source="jhu")
-    print(tracker.getLocationData(Location(country_code="CA")))
+# def main():
+#     tracker = COVID19(data_source="jhu")
+#     print(tracker.getLocationData(Location(country_code="CA")))
 
-if __name__ == '__main__':
-    main()
+# if __name__ == '__main__':
+#     main()
