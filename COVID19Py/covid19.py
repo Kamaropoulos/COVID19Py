@@ -2,7 +2,9 @@ from typing import Dict, List
 import requests
 import json
 
+
 class COVID19(object):
+    # Aggregate root
     default_url = "https://covid-tracker-us.herokuapp.com"
     url = ""
     data_source = ""
@@ -50,7 +52,7 @@ class COVID19(object):
         self.data_source = data_source
 
     def _update(self, timelines):
-        latest = self.getLatest()
+        latest = GetLatestInformation.getLatest(self)
         locations = self.getLocations(timelines)
         if self.latestData:
             self.previousData = self.latestData
@@ -67,36 +69,13 @@ class COVID19(object):
     def _request(self, endpoint, params=None):
         if params is None:
             params = {}
-        response = requests.get(self.url + endpoint, {**params, "source":self.data_source})
+        response = requests.get(self.url + endpoint, {**params, "source": self.data_source})
         response.raise_for_status()
         return response.json()
 
     def getAll(self, timelines=False):
         self._update(timelines)
         return self.latestData
-
-    def getLatestChanges(self):
-        changes = None
-        if self.previousData:
-            changes = {
-                "confirmed": self.latestData["latest"]["confirmed"] - self.latestData["latest"]["confirmed"],
-                "deaths": self.latestData["latest"]["deaths"] - self.latestData["latest"]["deaths"],
-                "recovered": self.latestData["latest"]["recovered"] - self.latestData["latest"]["recovered"],
-            }
-        else:
-            changes = {
-                "confirmed": 0,
-                "deaths": 0,
-                "recovered": 0,
-            }
-        return changes
-
-    def getLatest(self) -> List[Dict[str, int]]:
-        """
-        :return: The latest amount of total confirmed cases, deaths, and recoveries.
-        """
-        data = self._request("/v2/latest")
-        return data["latest"]
 
     def getLocations(self, timelines=False, rank_by: str = None) -> List[Dict]:
         """
@@ -112,7 +91,7 @@ class COVID19(object):
             data = self._request("/v2/locations")
 
         data = data["locations"]
-        
+
         ranking_criteria = ['confirmed', 'deaths', 'recovered']
         if rank_by is not None:
             if rank_by not in ranking_criteria:
@@ -135,7 +114,7 @@ class COVID19(object):
         else:
             data = self._request("/v2/locations", {"country_code": country_code})
         return data["locations"]
-    
+
     def getLocationByCountry(self, country, timelines=False) -> List[Dict]:
         """
         :param country: String denoting name of the country
@@ -156,3 +135,36 @@ class COVID19(object):
         """
         data = self._request("/v2/locations/" + str(country_id))
         return data["location"]
+
+
+########################################################################################################################
+
+
+class GetLatestInformation(COVID19):
+
+    def getLatest(self) -> List[Dict[str, int]]:
+
+        """
+        :return: The latest amount of total confirmed cases, deaths, and recoveries.
+        """
+
+        data = self._request("/v2/latest")
+        return data["latest"]
+
+    def getLatestChanges(self):
+        changes = None
+        if self.previousData:
+            changes = {
+                "confirmed": self.latestData["latest"]["confirmed"] - self.latestData["latest"]["confirmed"],
+                "deaths": self.latestData["latest"]["deaths"] - self.latestData["latest"]["deaths"],
+                "recovered": self.latestData["latest"]["recovered"] - self.latestData["latest"]["recovered"],
+            }
+        else:
+            changes = {
+                "confirmed": 0,
+                "deaths": 0,
+                "recovered": 0,
+            }
+        return changes
+
+    # #######################################################################################################################
