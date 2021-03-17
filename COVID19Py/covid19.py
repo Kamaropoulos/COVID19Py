@@ -11,10 +11,10 @@ class COVID19(object):
 
     mirrors_source = "https://raw.github.com/Kamaropoulos/COVID19Py/master/mirrors.json"
     mirrors = None
-
-    def __init__(self, url="https://covid-tracker-us.herokuapp.com", data_source='jhu',data_object=data.Data()):
-        self.previousData = data_object.previousData
-        self.latestData =  data_object.latestData
+    data_object = data.Data()
+    def __init__(self, url="https://covid-tracker-us.herokuapp.com", data_source='jhu'):
+        
+       
         # Skip mirror checking if custom url was passed
         if url == self.default_url:
             # Load mirrors
@@ -53,9 +53,9 @@ class COVID19(object):
     def _update(self, timelines):
         latest = self.getLatest()
         locations = self.getLocations(timelines)
-        if self.latestData:
-            self.previousData = self.latestData
-        self.latestData = {
+        if self.data_object.latestData:
+            self.data_object.previousData = self.data_object.latestData
+        self.data_object.latestData = {
             "latest": latest,
             "locations": locations
         }
@@ -74,15 +74,15 @@ class COVID19(object):
 
     def getAll(self, timelines=False):
         self._update(timelines)
-        return self.latestData
+        return self.data_object.latestData
 
     def getLatestChanges(self):
         changes = None
-        if self.previousData:
+        if self.data_object.previousData:
             changes = {
-                "confirmed": self.latestData["latest"]["confirmed"] - self.latestData["latest"]["confirmed"],
-                "deaths": self.latestData["latest"]["deaths"] - self.latestData["latest"]["deaths"],
-                "recovered": self.latestData["latest"]["recovered"] - self.latestData["latest"]["recovered"],
+                "confirmed": self.data_object.latestData["latest"]["confirmed"] - self.data_object.latestData["latest"]["confirmed"],
+                "deaths": self.data_object.latestData["latest"]["deaths"] - self.data_object.latestData["latest"]["deaths"],
+                "recovered":self.data_object.latestData["latest"]["recovered"] - self.data_object.latestData["latest"]["recovered"],
             }
         else:
             changes = {
