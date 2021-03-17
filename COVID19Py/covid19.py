@@ -1,4 +1,5 @@
-from typing import Dict, List
+from typing 
+import Dict, List
 import requests
 import json
 
@@ -49,16 +50,6 @@ class COVID19(object):
             raise ValueError("Invalid data source. Expected one of: %s" % self._valid_data_sources)
         self.data_source = data_source
 
-    def _update(self, timelines):
-        latest = self.getLatest()
-        locations = self.getLocations(timelines)
-        if self.latestData:
-            self.previousData = self.latestData
-        self.latestData = {
-            "latest": latest,
-            "locations": locations
-        }
-
     def _getSources(self):
         response = requests.get(self.url + "/v2/sources")
         response.raise_for_status()
@@ -71,6 +62,26 @@ class COVID19(object):
         response.raise_for_status()
         return response.json()
 
+##########################################################################
+class updates:                      
+
+    def __init__(self, latestData, previousData, timelines, request):
+        self.latestData = latestData
+        self.previousData = previousData
+        self.timelines = timelines
+        self.request = request
+
+  def _update(self, timelines):
+        latest = self.getLatest()
+        getlocation = Locatio_based_updates.getLocations
+        locations = self.getlocation(timelines)
+        if self.latestData:
+            self.previousData = self.latestData
+        self.latestData = {
+            "latest": latest,
+            "locations": locations
+        }
+
     def getAll(self, timelines=False):
         self._update(timelines)
         return self.latestData
@@ -79,9 +90,9 @@ class COVID19(object):
         changes = None
         if self.previousData:
             changes = {
-                "confirmed": self.latestData["latest"]["confirmed"] - self.latestData["latest"]["confirmed"],
-                "deaths": self.latestData["latest"]["deaths"] - self.latestData["latest"]["deaths"],
-                "recovered": self.latestData["latest"]["recovered"] - self.latestData["latest"]["recovered"],
+                "confirmed": self.latestData["latest"]["confirmed"] - self.previousData["latest"]["confirmed"],
+                "deaths": self.latestData["latest"]["deaths"] - self.previousData["latest"]["deaths"],
+                "recovered": self.latestData["latest"]["recovered"] - self.previousData["latest"]["recovered"],
             }
         else:
             changes = {
@@ -95,8 +106,17 @@ class COVID19(object):
         """
         :return: The latest amount of total confirmed cases, deaths, and recoveries.
         """
-        data = self._request("/v2/latest")
+       data = self._request("/v2/latest")
         return data["latest"]
+
+
+ ###############################################################################################
+
+class Locatio_based_updates:
+
+    def __init__(self, timelines=False, request):
+        self.request = request
+        self.timelines = timelines
 
     def getLocations(self, timelines=False, rank_by: str = None) -> List[Dict]:
         """
