@@ -8,7 +8,7 @@ class COVID19(object):
     data_source = ""
     previousData = None
     latestData = None
-    data = None
+ #   data = None
     _valid_data_sources = []
 
     mirrors_source = "https://raw.github.com/Kamaropoulos/COVID19Py/master/mirrors.json"
@@ -65,7 +65,8 @@ class COVID19(object):
 
     def _update(self, timelines):
         latest = self.getLatest()
-        locations = self.data(timelines)
+        getlocation = Locatio_based_updates.getLocations
+        locations = self.getlocation(timelines)
         if self.latestData:
             self.previousData = self.latestData
         self.latestData = {
