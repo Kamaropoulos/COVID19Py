@@ -49,16 +49,6 @@ class COVID19(object):
             raise ValueError("Invalid data source. Expected one of: %s" % self._valid_data_sources)
         self.data_source = data_source
 
-    def _update(self, timelines):
-        latest = self.getLatest()
-        locations = self.getLocations(timelines)
-        if self.latestData:
-            self.previousData = self.latestData
-        self.latestData = {
-            "latest": latest,
-            "locations": locations
-        }
-
     def _getSources(self):
         response = requests.get(self.url + "/v2/sources")
         response.raise_for_status()
@@ -70,6 +60,17 @@ class COVID19(object):
         response = requests.get(self.url + endpoint, {**params, "source":self.data_source})
         response.raise_for_status()
         return response.json()
+
+
+    def _update(self, timelines):
+        latest = self.getLatest()
+        locations = self.getLocations(timelines)
+        if self.latestData:
+            self.previousData = self.latestData
+        self.latestData = {
+            "latest": latest,
+            "locations": locations
+        }
 
     def getAll(self, timelines=False):
         self._update(timelines)
@@ -97,6 +98,14 @@ class COVID19(object):
         """
         data = self._request("/v2/latest")
         return data["latest"]
+
+###############################################################################################
+
+class Locatio_based_updates:
+
+    def __init__(self, timelines=False, request):
+        self.request = request
+        self.timelines = timelines
 
     def getLocations(self, timelines=False, rank_by: str = None) -> List[Dict]:
         """
