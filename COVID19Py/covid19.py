@@ -64,7 +64,7 @@ class COVID19(object):
 
     def _update(self, timelines):
         latest = self.getLatest()
-        locations = self.getLocations(timelines)
+        locations = self.data(timelines)
         if self.latestData:
             self.previousData = self.latestData
         self.latestData = {
@@ -103,7 +103,7 @@ class COVID19(object):
 
 class Locatio_based_updates:
 
-    def __init__(self, timelines=False, request):
+    def __init__(self, timelines=False, request, data):
         self.request = request
         self.timelines = timelines
 
