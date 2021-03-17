@@ -1,5 +1,7 @@
 # COVID19Py
+
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+
 [![Downloads](https://pepy.tech/badge/covid19py)](https://pepy.tech/project/covid19py)
 [![Downloads](https://pepy.tech/badge/covid19py/month)](https://pepy.tech/project/covid19py/month)
 [![Downloads](https://pepy.tech/badge/covid19py/week)](https://pepy.tech/project/covid19py/week)
@@ -8,8 +10,11 @@
 [![CodeFactor](https://www.codefactor.io/repository/github/kamaropoulos/covid19py/badge)](https://www.codefactor.io/repository/github/kamaropoulos/covid19py)
 [![HitCount](http://hits.dwyl.com/Kamaropoulos/COVID19Py.svg)](http://hits.dwyl.com/Kamaropoulos/COVID19Py)
 [![GitHub stars](https://img.shields.io/github/stars/Kamaropoulos/COVID19Py.svg?style=social&label=Star)](https://github.com/Kamaropoulos/COVID19Py)
+
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
+
 A tiny Python package for easy access to up-to-date Coronavirus (COVID-19, SARS-CoV-2) cases data.
+
 <!-- Python API Wrapper for tracking Coronavirus (COVID-19, SARS-CoV-2) via https://github.com/ExpDev07/coronavirus-tracker-api -->
 
 ## About
@@ -18,10 +23,12 @@ COVID19Py is a Python wrapper made to be compatible with [ExpDev07/coronavirus-t
 It retrieves data directly from an instance of [@ExpDev07](https://covid-tracker-us.herokuapp.com/)'s backend but it can also be set up to use a different backend.
 
 To achieve this, just pass the URL of the backend as a parameter to the library's constructor:
+
 ```python
 import COVID19Py
 covid19 = COVID19Py.COVID19("https://my-awesome-covid19-backend")
 ```
+
 ## Installation
 
 In order install this package, simply run:
@@ -43,9 +50,11 @@ covid19 = COVID19Py.COVID19()
 
 COVID19Py supports the retrieval of data from multiple data sources.
 To choose a specific data source, simply pass it as a parameter to the library's constructor:
+
 ```python
 covid19 = COVID19Py.COVID19(data_source="csbs")
 ```
+
 For more details about the available data sources, please check the [API's documentation](https://github.com/ExpDev07/coronavirus-tracker-api/blob/master/README.md#picking-data-source).
 
 ### Getting latest amount of total confirmed cases, deaths, and recoveries:
@@ -65,6 +74,7 @@ or:
 ```python
 locations = covid19.getLocations(timelines=True)
 ```
+
 to also get timelines.
 
 You can also rank the results by `confirmed`, `deaths` or `recovered`.
@@ -78,10 +88,13 @@ locations = covid19.getLocations(rank_by='recovered')
 ```python
 location = covid19.getLocationByCountryCode("US")
 ```
+
 or:
+
 ```python
 location = covid19.getLocationByCountryCode("US", timelines=True)
 ```
+
 to also get timelines.
 
 ### Getting a specific location (includes timelines by default):
@@ -102,7 +115,6 @@ or:
 location = covid19.getLocationByCountry("Zimbabwe", timelines=True)
 ```
 
-
 ### Getting all data at once:
 
 You can also get all the available data with one command.
@@ -110,10 +122,13 @@ You can also get all the available data with one command.
 ```python
 data = covid19.getAll()
 ```
+
 or:
+
 ```python
 data = covid19.getAll(timelines=True)
 ```
+
 to also get timelines.
 
 `latest` will be available on `data["latest"]` and `locations` will be available on `data["locations"]`.
@@ -125,18 +140,21 @@ When using `getAll()`, COVID19Py will also store the previous version of the ret
 ```python
 changes = covid19.getLatestChanges()
 ```
+
 ```json
 {
-    "confirmed": 512,
-    "deaths": 16,
-    "recovered": 1024
+  "confirmed": 512,
+  "deaths": 16,
+  "recovered": 1024
 }
 ```
+
 ## Contributing
 
 You will need to fork this repository onto your own GitHub account, then clone the repo to your local machine.
 
 In the project directory, you will need to make sure the required packages are installed. To install requirements from the Pipfile, run a command like the following, which may depend on how you have package management set up:
+
 ```bash
 pipenv install
 ```
@@ -157,6 +175,9 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 
 <!-- markdownlint-enable -->
 <!-- prettier-ignore-end -->
+
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
 This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
+
+
