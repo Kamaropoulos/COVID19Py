@@ -63,8 +63,8 @@ class COVID19(object):
         return response.json()
 
 ##########################################################################
-class updates
-
+class updates:
+    
     def __init__(self, latestData, previousData, timelines, request):
         self.latestData = latestData
         self.previousData = previousData
