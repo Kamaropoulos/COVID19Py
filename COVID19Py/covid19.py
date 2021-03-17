@@ -6,9 +6,7 @@ class COVID19(object):
     default_url = "https://covid-tracker-us.herokuapp.com"
     url = ""
     data_source = ""
-    
     _valid_data_sources = []
-
     mirrors_source = "https://raw.github.com/Kamaropoulos/COVID19Py/master/mirrors.json"
     mirrors = None
     data_object = data.Data()
