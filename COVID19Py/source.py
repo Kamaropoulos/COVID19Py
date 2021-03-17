@@ -21,7 +21,6 @@ class Source(object):
             result = None
             try:
                 result = self._getSources()
-                print(result)
                 if self.data_source in result:
                     
                     if requests.get(self.url,{"source":self.data_source}).status_code == 200:
