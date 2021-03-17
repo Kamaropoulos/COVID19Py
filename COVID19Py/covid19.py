@@ -8,7 +8,6 @@ class COVID19(object):
     data_source = ""
     previousData = None
     latestData = None
- #   data = None
     _valid_data_sources = []
 
     mirrors_source = "https://raw.github.com/Kamaropoulos/COVID19Py/master/mirrors.json"
