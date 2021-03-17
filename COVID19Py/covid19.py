@@ -161,8 +161,6 @@ class COVID19CountryBasedDataRetrieval(object):
 # Country-based data searches
 ###############################
 
-    def __init__ (self, userrequestsetup)
-
     #get case data by method of country name
     def getLocationByCountry(self, country, timelines=False) -> List[Dict]:
         """
