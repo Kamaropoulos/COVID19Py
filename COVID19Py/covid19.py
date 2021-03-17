@@ -65,8 +65,8 @@ class UserRequestSetup(object):
    
  
 
-#class acting as an aggregate for all data retrieval operations
-class COVID19DataRetrieval(object):
+#class acting as an aggregate for generalized data retrieval operations
+class COVID19GeneralizedDataRetrieval(object):
     #originally variables from the class COVID19. Variables are only used in the operations contained within the COVIDDataRetrieval class, hence they were moved here
     __previousData = None
     __latestData = None
@@ -87,7 +87,6 @@ class COVID19DataRetrieval(object):
             "latest": latest,
             "locations": locations
         }
-
 
 #############################
 # Generalized data searches
@@ -151,9 +150,18 @@ class COVID19DataRetrieval(object):
         return data
 
 
+#class acting as an aggregate for country-based data retrieval operations
+class COVID19CountryBasedDataRetrieval(object):
+
+    #"constructor" method that initializes data members of the class, where applicable
+    def __init__(self, userrequestsetup)
+	self.userrequestsetup = userrequestsetup #enables/allows us to access methods in the UserRequestSetup class, mainly the request method
+
 ###############################
 # Country-based data searches
 ###############################
+
+    def __init__ (self, userrequestsetup)
 
     #get case data by method of country name
     def getLocationByCountry(self, country, timelines=False) -> List[Dict]:
