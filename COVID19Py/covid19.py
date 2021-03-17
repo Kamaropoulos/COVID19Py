@@ -67,7 +67,7 @@ class COVID19(object):
     def _request(self, endpoint, params=None):
         if params is None:
             params = {}
-        response = requests.get(self.url + endpoint, {**params, "source":self.data_source})
+        response = requests.get(self.url + endpoint, {*params, "source":self.data_source}) #fixed a syntax error (originally **)
         response.raise_for_status()
         return response.json()
 
@@ -79,9 +79,9 @@ class COVID19(object):
         changes = None
         if self.previousData:
             changes = {
-                "confirmed": self.latestData["latest"]["confirmed"] - self.latestData["latest"]["confirmed"],
-                "deaths": self.latestData["latest"]["deaths"] - self.latestData["latest"]["deaths"],
-                "recovered": self.latestData["latest"]["recovered"] - self.latestData["latest"]["recovered"],
+                "confirmed": self.latestData["latest"]["confirmed"] - self.previousData["latest"]["confirmed"], #changed from latestData to previousData
+                "deaths": self.latestData["latest"]["deaths"] - self.previousData["latest"]["deaths"],		#changed from latestData to previousData
+                "recovered": self.latestData["latest"]["recovered"] - self.previousData["latest"]["recovered"], #changed from latestData to previousData
             }
         else:
             changes = {
