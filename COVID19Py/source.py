@@ -6,7 +6,6 @@ class Source(object):
 
     mirrors_source = "https://raw.github.com/Kamaropoulos/COVID19Py/master/mirrors.json"
     
-    data_source = None
     def __init__ (self,url,data_source):
         self.url = url
         self.data_source = data_source
@@ -23,23 +22,28 @@ class Source(object):
             try:
                 result = self._getSources()
                 print(result)
-                if "jhu" in result:
-                    # We found a mirror that worked just fine, let's stick with it
-                    break
+                if self.data_source in result:
+                    
+                    if requests.get(self.url,{"source":self.data_source}).status_code == 200:
+                        break
+                    
+                    #check if last element in mirror then check if the mirror is functiontion 
+                    if mirror == self.mirrors[-1] and requests.get(self.url,{"source":self.data_source}).status_code != 200:
+                        #None of the mirrors worked. Raise an error to inform the user.
+                        raise RuntimeError("No available API mirror was found.")
+
             except Exception as e:
-                # URL did not work, reset it and move on
-                self.url = ""
-                continue
-                # None of the mirrors worked. Raise an error to inform the user.
-                raise RuntimeError("No available API mirror was found.")
+                raise e
           
 
 
 
     def _getSources(self):
         response = requests.get(self.url + "/v2/sources")
-        response.raise_for_status()
-        return response.json()['sources']
+        if response.status_code == 200:
+            return response.json()['sources']
+        else:
+            return []
 
     def getUrl(self):
         return self.url
