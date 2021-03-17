@@ -130,10 +130,7 @@ class base(object):
         :return: A list of areas that correspond to the country_code. If the country_code is invalid, it returns an empty list.
         """
         data = None
-        if timelines:
-            data = self._request("/v2/locations", {"country_code": country_code, "timelines": str(timelines).lower()})
-        else:
-            data = self._request("/v2/locations", {"country_code": country_code})
+        data = timelineChecker(country_code, timelines)
         return data["locations"]
     
     def getLocationByCountry(self, country, timelines=False) -> List[Dict]:
@@ -143,10 +140,7 @@ class base(object):
         :return: A list of areas that correspond to the country name. If the country is invalid, it returns an empty list.
         """
         data = None
-        if timelines:
-            data = self._request("/v2/locations", {"country": country, "timelines": str(timelines).lower()})
-        else:
-            data = self._request("/v2/locations", {"country": country})
+        data = timelineChecker(country, timelines)
         return data["locations"]
 
     def getLocationById(self, country_id: int):
@@ -154,5 +148,27 @@ class base(object):
         :param country_id: Country Id, an int
         :return: A dictionary with case information for the specified location.
         """
-        data = self._request("/v2/locations/" + str(country_id))
+        data = timelineChecker(country_id, None)
         return data["location"]
+
+    def timelineChecker(self, location, timelines) -> List[Dict]:
+        """
+        Sets data according to whether a country ID, country name, or country code is used
+        :return: A dictionary with case information for the specified location.
+        """
+        try: #is a country id
+            location += 0
+            data = self._request("/v2/locations/" + str(location))
+        except TypeError: #is a country name
+            if len(location) > 2:
+                if timelines:
+                    data = self._request("/v2/locations", {"country": country, "timelines": str(timelines).lower()})
+                else:
+                    data = self._request("/v2/locations", {"country": country})
+            else: #is a country code
+                if timelines:
+                    data = self._request("/v2/locations", {"country_code": country_code, "timelines": str(timelines).lower()})
+                else:
+                    data = self._request("/v2/locations", {"country_code": country_code})
+
+
