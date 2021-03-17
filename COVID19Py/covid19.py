@@ -106,11 +106,7 @@ class COVID19(object):
         :return: List of dictionaries representing all affected locations.
         """
         data = None
-        if timelines:
-            data = self._request("/v2/locations", {"timelines": str(timelines).lower()})
-        else:
-            data = self._request("/v2/locations")
-
+        data = timelineChecker(timelines)
         data = data["locations"]
 
         ranking_criteria = ['confirmed', 'deaths', 'recovered']
@@ -130,10 +126,7 @@ class COVID19(object):
         :return: A list of areas that correspond to the country_code. If the country_code is invalid, it returns an empty list.
         """
         data = None
-        if timelines:
-            data = self._request("/v2/locations", {"country_code": country_code, "timelines": str(timelines).lower()})
-        else:
-            data = self._request("/v2/locations", {"country_code": country_code})
+        data = timelineChecker(timelines)
         return data["locations"]
 
     def getLocationByCountry(self, country, timelines=False) -> List[Dict]:
@@ -143,10 +136,7 @@ class COVID19(object):
         :return: A list of areas that correspond to the country name. If the country is invalid, it returns an empty list.
         """
         data = None
-        if timelines:
-            data = self._request("/v2/locations", {"country": country, "timelines": str(timelines).lower()})
-        else:
-            data = self._request("/v2/locations", {"country": country})
+        data = timelineChecker(timelines)
         return data["locations"]
 
     def getLocationById(self, country_id: int):
@@ -156,11 +146,9 @@ class COVID19(object):
         """
         data = self._request("/v2/locations/" + str(country_id))
         return data["location"]
-
-    def checkForType(countryToCheck):
-        if isinstance(checker, int):
-            getLocationById(countryToCheck)
-        elif len(checker) <=2:
-            getLocationByCountryCode(countryToCheck)
+    
+    def timelineChecker(timelines):
+         if timelines:
+            data = self._request("/v2/locations", {"country": country, "timelines": str(timelines).lower()})
         else:
-            getLocationByCountry(countryToCheck)
+            data = self._request("/v2/locations", {"country": country})
