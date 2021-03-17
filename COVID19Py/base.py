@@ -170,5 +170,3 @@ class base(object):
                     data = self._request("/v2/locations", {"country_code": country_code, "timelines": str(timelines).lower()})
                 else:
                     data = self._request("/v2/locations", {"country_code": country_code})
-
-
