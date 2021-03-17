@@ -156,3 +156,11 @@ class COVID19(object):
         """
         data = self._request("/v2/locations/" + str(country_id))
         return data["location"]
+    
+    def checkForType(countryToCheck):
+        if isinstance(checker, int):
+            getLocationById(countryToCheck)
+        elif len(checker) <=2:
+            getLocationByCountryCode(countryToCheck)
+        else:
+            getLocationByCountry(countryToCheck)
