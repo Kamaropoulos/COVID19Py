@@ -9,12 +9,14 @@ class COVID19(object):
     previousData = None
     latestData = None
     _valid_data_sources = []
+	CaseOccurrence co
 
     mirrors_source = "https://raw.github.com/Kamaropoulos/COVID19Py/master/mirrors.json"
     mirrors = None
 
     def __init__(self, url="https://covid-tracker-us.herokuapp.com", data_source='jhu'):
-        # Skip mirror checking if custom url was passed
+        co = CaseOccurrence()
+		# Skip mirror checking if custom url was passed
         if url == self.default_url:
             # Load mirrors
             response = requests.get(self.mirrors_source)
@@ -95,8 +97,7 @@ class COVID19(object):
         """
         :return: The latest amount of total confirmed cases, deaths, and recoveries.
         """
-        data = self._request("/v2/latest")
-        return data["latest"]
+        return co.getCases
 
     def getLocations(self, timelines=False, rank_by: str = None) -> List[Dict]:
         """
@@ -142,12 +143,8 @@ class COVID19(object):
         :param timelines: Whether timeline information should be returned as well.
         :return: A list of areas that correspond to the country name. If the country is invalid, it returns an empty list.
         """
-        data = None
-        if timelines:
-            data = self._request("/v2/locations", {"country": country, "timelines": str(timelines).lower()})
-        else:
-            data = self._request("/v2/locations", {"country": country})
-        return data["locations"]
+        
+        return co.getLocation(country)
 
     def getLocationById(self, country_id: int):
         """
@@ -156,3 +153,75 @@ class COVID19(object):
         """
         data = self._request("/v2/locations/" + str(country_id))
         return data["location"]
+		
+class CovidCases(object):
+	
+	dataList
+	def __init__(self)
+		dataList = []
+		
+	def getLatest(self) -> List[Dict[str, int]]:
+        """
+        :return: The latest amount of total confirmed cases, deaths, and recoveries.
+        """
+        data = self._request("/v2/latest")
+        return data["latest"]
+
+		# might seem redundant, however to avoid this and make proper use of agregates alot of code would have to rewritten
+	def _request(self, endpoint, params=None):
+        if params is None:
+            params = {}
+        response = requests.get(self.url + endpoint, {**params, "source":self.data_source})
+        response.raise_for_status()
+        return response.json()
+		
+	def update(self)
+		dataList = getLatest()
+		
+class CaseLocation(object):
+	
+	dataList
+	def __init__(self)
+		dataList = []
+		
+	def getLocationByCountry(self, country, timelines=False) -> List[Dict]:
+        """
+        :param country: String denoting name of the country
+        :param timelines: Whether timeline information should be returned as well.
+        :return: A list of areas that correspond to the country name. If the country is invalid, it returns an empty list.
+        """
+        data = None
+        if timelines:
+            data = self._request("/v2/locations", {"country": country, "timelines": str(timelines).lower()})
+        else:
+            data = self._request("/v2/locations", {"country": country})
+        return data["locations"]	
+		
+	def _request(self, endpoint, params=None):
+        if params is None:
+            params = {}
+        response = requests.get(self.url + endpoint, {**params, "source":self.data_source})
+        response.raise_for_status()
+        return response.json()
+		
+		# a method like this could be created for getLocationById and getLocationByCountryCode and getLocations
+		# that way _request could be removed from the main class
+	def update(self, country, timelines=False)
+		dataList = getLocationByCountry(country)
+		
+class CaseOccurrence(object):
+	CovidCases cc
+	CaseLocation cl
+	
+	def _init_(self):
+		cc = CovidCases()
+		cl = CaseLocation()
+	
+		# not sure if self needs to be used here
+	def getLocation(self, country, timelines=False) -> List[Dict]:
+		cl.update(country)
+		return cl.dataList
+		
+	def getCases(self):
+		cc.update()
+		return cc.dataList
