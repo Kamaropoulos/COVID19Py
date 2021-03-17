@@ -13,7 +13,7 @@ class COVID19(object):
     mirrors_source = "https://raw.github.com/Kamaropoulos/COVID19Py/master/mirrors.json"
     mirrors = None
 
-    def __init__(self, url="https://covid-tracker-us.herokuapp.com", data_source='jhu'):
+    def __init__(self, url="https://covid-tracker-us.herokuapp.com", data_source="jhu"):
         # Skip mirror checking if custom url was passed
         if url == self.default_url:
             # Load mirrors
@@ -51,7 +51,7 @@ class COVID19(object):
 
     def _update(self, timelines):
         latest = self.getLatest()
-        locations = self.getLocations(timelines)
+        locations = self.getAllLocations(timelines)
         if self.latestData:
             self.previousData = self.latestData
         self.latestData = {
@@ -98,7 +98,7 @@ class COVID19(object):
         data = self._request("/v2/latest")
         return data["latest"]
 
-    def getLocations(self, timelines=False, rank_by: str = None) -> List[Dict]:
+    def getAllLocations(self, timelines=False, rank_by: str = None) -> List[Dict]:
         """
         Gets all locations affected by COVID-19, as well as latest case data.
         :param timelines: Whether timeline information should be returned as well.
@@ -123,36 +123,63 @@ class COVID19(object):
 
         return data
 
-    def getLocationByCountryCode(self, country_code, timelines=False) -> List[Dict]:
+    def getLocationData(self, location, timelines=False):
         """
-        :param country_code: String denoting the ISO 3166-1 alpha-2 code (https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) of the country
+        :param location: Location containing any combination of strings denoting...
+            - the name of the country
+            - the ISO 3166-1 alpha-2 code (https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) of the country
+            - the country id, an int
         :param timelines: Whether timeline information should be returned as well.
-        :return: A list of areas that correspond to the country_code. If the country_code is invalid, it returns an empty list.
+        :return: Either a list of areas that correspond to the location, or a dictionary with case information for the specified location.
         """
-        data = None
-        if timelines:
-            data = self._request("/v2/locations", {"country_code": country_code, "timelines": str(timelines).lower()})
-        else:
-            data = self._request("/v2/locations", {"country_code": country_code})
-        return data["locations"]
-    
-    def getLocationByCountry(self, country, timelines=False) -> List[Dict]:
-        """
-        :param country: String denoting name of the country
-        :param timelines: Whether timeline information should be returned as well.
-        :return: A list of areas that correspond to the country name. If the country is invalid, it returns an empty list.
-        """
-        data = None
-        if timelines:
-            data = self._request("/v2/locations", {"country": country, "timelines": str(timelines).lower()})
-        else:
-            data = self._request("/v2/locations", {"country": country})
-        return data["locations"]
+        # retrieve by country name
+        if location.country != "":
+            data = None
+            if timelines:
+                data = self._request("/v2/locations", {"country": location.country, "timelines": str(timelines).lower()})
+            else:
+                data = self._request("/v2/locations", {"country": location.country})
+            return data["locations"]
 
-    def getLocationById(self, country_id: int):
-        """
-        :param country_id: Country Id, an int
-        :return: A dictionary with case information for the specified location.
-        """
-        data = self._request("/v2/locations/" + str(country_id))
-        return data["location"]
+        # retrieve by country code
+        elif location.country_code != "":
+            data = None
+            if timelines:
+                data = self._request("/v2/locations", {"country_code": location.country_code, "timelines": str(timelines).lower()})
+            else:
+                data = self._request("/v2/locations", {"country_code": location.country_code})
+            return data["locations"]
+
+        # retrieve by country id
+        elif location.country_id != "":
+            data = self._request("/v2/locations/" + str(location.country_id))
+            return data["location"]
+
+
+class Location(object):
+    country = ""
+    country_code = ""
+    country_id = ""
+
+    def __init__(self, country=None, country_code=None, country_id=None):
+        if country is not None:
+            self.country = country
+        if country_code is not None:
+            self.country_code = country_code
+        if country_id is not None:
+            self.country_id = country_id
+
+    def __str__(self):
+        if self.country == "" and self.country_code == "" and self.country_id == "":
+            return "Warning! Invalid location provided."
+        else:
+            return "{: <25} ({}) \tid:{}".format(self.country, self.country_code, self.country_id)
+
+
+# Testing
+def main():
+    tracker = COVID19(data_source="jhu")
+    print(tracker.getLocationData(Location(country_code="CA")))
+
+if __name__ == '__main__':
+    main()
