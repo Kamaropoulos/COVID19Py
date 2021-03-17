@@ -130,10 +130,8 @@ class COVID19(object):
         :return: A list of areas that correspond to the country_code. If the country_code is invalid, it returns an empty list.
         """
         data = None
-        if timelines:
-            data = self._request("/v2/locations", {"country_code": country_code, "timelines": str(timelines).lower()})
-        else:
-            data = self._request("/v2/locations", {"country_code": country_code})
+        data = timeline(country_code, timelines)
+
         return data["locations"]
     
     def getLocationByCountry(self, country, timelines=False) -> List[Dict]:
@@ -143,16 +141,26 @@ class COVID19(object):
         :return: A list of areas that correspond to the country name. If the country is invalid, it returns an empty list.
         """
         data = None
-        if timelines:
-            data = self._request("/v2/locations", {"country": country, "timelines": str(timelines).lower()})
-        else:
-            data = self._request("/v2/locations", {"country": country})
+        data = timeline(country, timelines)
+        
         return data["locations"]
 
-    def getLocationById(self, country_id: int):
+    def getLocationById(self, country_id: int, timelines=False):
         """
         :param country_id: Country Id, an int
         :return: A dictionary with case information for the specified location.
         """
-        data = self._request("/v2/locations/" + str(country_id))
+        data = timeline(country_id, timelines)
         return data["location"]
+        
+    def timeline(self, country_info, timelines) -> List[Dict]:
+        if (isinstance(country_info, int)):
+            data = self._request("/v2/locations/" + str(country_info))
+        elif (isinstance(country_ info, str)) :
+            if timelines:
+                data = self._request("/v2/locations", {"country": country_info, "timelines": str(timelines).lower()})
+            else:
+                data = self._request("/v2/locations", {"country": country_info})
+        else :
+            data = None
+        
