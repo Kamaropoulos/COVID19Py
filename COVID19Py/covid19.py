@@ -13,8 +13,6 @@ class COVID19(object):
     mirrors = None
     data_object = data.Data()
     def __init__(self, url="https://covid-tracker-us.herokuapp.com", data_source='jhu'):
-        
-       
         # Skip mirror checking if custom url was passed
         if url == self.default_url:
             # Load mirrors
