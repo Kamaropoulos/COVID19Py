@@ -37,7 +37,7 @@ class COVID19(object):
         :return: List of dictionaries representing all affected locations.
         """
         timelines = timelines
-        return self.obj.getLocations(timelines, rank_by);
+        return self.obj.getLocations(timelines, rank_by)
 
     def getLocationByCountryCode(self, country_code, timelines=False) -> List[Dict]:
         """
