@@ -1,5 +1,4 @@
-import COVID19Py
+from COVID19Py import COVID19Py
 
 covid19 = COVID19Py.COVID19()
-
 print(covid19.getLatest())
