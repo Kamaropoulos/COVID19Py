@@ -142,7 +142,7 @@ class COVID19(object):
             return data["locations"]
 
         # retrieve by country code
-        elif location.country_code != "":
+        if location.country_code != "":
             data = None
             if timelines:
                 data = self._request("/v2/locations", {"country_code": location.country_code, "timelines": str(timelines).lower()})
@@ -151,7 +151,7 @@ class COVID19(object):
             return data["locations"]
 
         # retrieve by country id
-        elif location.country_id != "":
+        if location.country_id != "":
             data = self._request("/v2/locations/" + str(location.country_id))
             return data["location"]
 
@@ -172,8 +172,8 @@ class Location(object):
     def __str__(self):
         if self.country == "" and self.country_code == "" and self.country_id == "":
             return "Warning! Invalid location provided."
-        else:
-            return "{: <25} ({}) \tid:{}".format(self.country, self.country_code, self.country_id)
+        
+        return "{: <25} ({}) \tid:{}".format(self.country, self.country_code, self.country_id)
 
 
 # Testing
