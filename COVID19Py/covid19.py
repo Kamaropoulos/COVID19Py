@@ -1,19 +1,20 @@
 from typing import Dict, List
 import requests
 import json
-
+import data
 class COVID19(object):
     default_url = "https://covid-tracker-us.herokuapp.com"
     url = ""
     data_source = ""
-    previousData = None
-    latestData = None
+    
     _valid_data_sources = []
 
     mirrors_source = "https://raw.github.com/Kamaropoulos/COVID19Py/master/mirrors.json"
     mirrors = None
 
-    def __init__(self, url="https://covid-tracker-us.herokuapp.com", data_source='jhu'):
+    def __init__(self, url="https://covid-tracker-us.herokuapp.com", data_source='jhu',data_object=data.Data()):
+        self.previousData = data_object.previousData
+        self.latestData =  data_object.latestData
         # Skip mirror checking if custom url was passed
         if url == self.default_url:
             # Load mirrors
