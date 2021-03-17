@@ -112,7 +112,7 @@ class COVID19(object):
             data = self._request("/v2/locations")
 
         data = data["locations"]
-        
+
         ranking_criteria = ['confirmed', 'deaths', 'recovered']
         if rank_by is not None:
             if rank_by not in ranking_criteria:
@@ -135,7 +135,7 @@ class COVID19(object):
         else:
             data = self._request("/v2/locations", {"country_code": country_code})
         return data["locations"]
-    
+
     def getLocationByCountry(self, country, timelines=False) -> List[Dict]:
         """
         :param country: String denoting name of the country
@@ -156,3 +156,11 @@ class COVID19(object):
         """
         data = self._request("/v2/locations/" + str(country_id))
         return data["location"]
+
+    def checkForType(countryToCheck):
+        if isinstance(checker, int):
+            getLocationById(countryToCheck)
+        elif len(checker) <=2:
+            getLocationByCountryCode(countryToCheck)
+        else:
+            getLocationByCountry(countryToCheck)
