@@ -53,7 +53,7 @@ class COVID19(object):
 
     def _update(self, timelines):
         latest = GetLatestInformation.getLatest(self)
-        locations = self.getLocations(timelines)
+        locations = GetLatestInformation.getLocations(timelines)
         if self.latestData:
             self.previousData = self.latestData
         self.latestData = {
@@ -77,6 +77,8 @@ class COVID19(object):
         self._update(timelines)
         return self.latestData
 
+
+class GetInformationByCountry(COVID19):
     def getLocations(self, timelines=False, rank_by: str = None) -> List[Dict]:
         """
         Gets all locations affected by COVID-19, as well as latest case data.
