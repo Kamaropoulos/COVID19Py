@@ -55,12 +55,7 @@ class CovidLoc:
             data = self._request("/v2/locations", {"country_code": country_code})
         return data   
 
-    def getLatestTwo(self) -> List[Dict[str, int]]:
-        """
-        :return: The latest amount of total confirmed cases, deaths, and recoveries.
-        """
-        data = self._request("/v2/latest")
-        return data
+    
 
     def getLocationsTwo(self, timelines=False, rank_by: str = None) -> List[Dict]:
         """
@@ -179,8 +174,8 @@ class COVID19(object):
         """
         :return: The latest amount of total confirmed cases, deaths, and recoveries.
         """
-        
-        return self.covidLoc.getLatestTwo().json()["latest"]
+        data = self._request("/v2/latest")
+        return data["latest"]
 
     def getLocations(self, timelines=False, rank_by: str = None) -> List[Dict]:
         """
@@ -227,5 +222,4 @@ class COVID19(object):
         :param country_id: Country Id, an int
         :return: A dictionary with case information for the specified location.
         """
-        data = self._request("/v2/locations/" + str(country_id))
-        return data["location"]
+        return self.covidLoc.getLocationByIdTwoo(39).json()["location"]
