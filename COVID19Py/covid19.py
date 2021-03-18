@@ -203,7 +203,7 @@ class COVID19(object):
         return self.covidLoc.getLocationByCountryTwo(country).json()["locations"]
 
     
-
+    
     def getLocationById(self, country_id: int):
         """
         :param country_id: Country Id, an int
