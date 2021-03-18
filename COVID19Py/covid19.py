@@ -55,6 +55,29 @@ class CovidLoc:
             data = self._request("/v2/locations", {"country_code": country_code})
         return data   
 
+    def getLatestTwo(self) -> List[Dict[str, int]]:
+        """
+        :return: The latest amount of total confirmed cases, deaths, and recoveries.
+        """
+        data = self._request("/v2/latest")
+        return data
+
+    def getLocationsTwo(self, timelines=False, rank_by: str = None) -> List[Dict]:
+        """
+        Gets all locations affected by COVID-19, as well as latest case data.
+        :param timelines: Whether timeline information should be returned as well.
+        :param rank_by: Category to rank results by. ex: confirmed
+        :return: List of dictionaries representing all affected locations.
+        """
+        data = None
+        if timelines:
+            data = self._request("/v2/locations", {"timelines": str(timelines).lower()})
+        else:
+            data = self._request("/v2/locations")
+
+
+        return data
+
 
 covidloc = CovidLoc()
 
@@ -156,8 +179,8 @@ class COVID19(object):
         """
         :return: The latest amount of total confirmed cases, deaths, and recoveries.
         """
-        data = self._request("/v2/latest")
-        return data["latest"]
+        
+        return self.covidLoc.getLatestTwo().json()["latest"]
 
     def getLocations(self, timelines=False, rank_by: str = None) -> List[Dict]:
         """
@@ -166,13 +189,9 @@ class COVID19(object):
         :param rank_by: Category to rank results by. ex: confirmed
         :return: List of dictionaries representing all affected locations.
         """
-        data = None
-        if timelines:
-            data = self._request("/v2/locations", {"timelines": str(timelines).lower()})
-        else:
-            data = self._request("/v2/locations")
+        
 
-        data = data["locations"]
+        data = self.covidLoc.getLocationsTwo(rank_by).json()["locations"]
         
         ranking_criteria = ['confirmed', 'deaths', 'recovered']
         if rank_by is not None:
@@ -201,12 +220,12 @@ class COVID19(object):
         """
         
         return self.covidLoc.getLocationByCountryTwo(country).json()["locations"]
-        
+
     
     def getLocationById(self, country_id: int):
         """
         :param country_id: Country Id, an int
         :return: A dictionary with case information for the specified location.
         """
-        
-        return self.covidLoc.getLocationByIdTwoo(39).json()["location"]
+        data = self._request("/v2/locations/" + str(country_id))
+        return data["location"]
