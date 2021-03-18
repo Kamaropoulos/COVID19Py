@@ -4,7 +4,7 @@ import json
 
 
 
-class CovidLoc:
+class CovidInput:
     url = ""
     data_source = ""
     
@@ -74,7 +74,7 @@ class CovidLoc:
         return data
 
 
-covidloc = CovidLoc()
+covidloc = CovidInput()
 
 class COVID19(object):
     default_url = "https://covid-tracker-us.herokuapp.com"
