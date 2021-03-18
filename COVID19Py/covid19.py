@@ -211,14 +211,5 @@ class COVID19(object):
         """
         
         return self.covidLoc.getLocationByIdTwoo(39).json()["location"]
-    
-    
-
-    # def getLocationByIdtwo(self, country_id: int):
-      
-        
-        
-    #     return self.covidLoc.getLocationByIdTwoo(39).json()["location"]
-    
 
     
