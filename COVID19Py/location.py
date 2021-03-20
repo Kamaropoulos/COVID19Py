@@ -8,10 +8,10 @@ class LocationBased:
         """
         data = None
         if timelines:
-            data = self._request(
+            data = self.request(
                 "/v2/locations", {"timelines": str(timelines).lower()})
         else:
-            data = self._request("/v2/locations")
+            data = self.request("/v2/locations")
 
         data = data["locations"]
 
@@ -35,10 +35,10 @@ class LocationBased:
         """
         data = None
         if timelines:
-            data = self._request(
+            data = self.request(
                 "/v2/locations", {"country_code": country_code, "timelines": str(timelines).lower()})
         else:
-            data = self._request(
+            data = self.request(
                 "/v2/locations", {"country_code": country_code})
         return data["locations"]
 
@@ -50,10 +50,10 @@ class LocationBased:
         """
         data = None
         if timelines:
-            data = self._request(
+            data = self.request(
                 "/v2/locations", {"country": country, "timelines": str(timelines).lower()})
         else:
-            data = self._request("/v2/locations", {"country": country})
+            data = self.request("/v2/locations", {"country": country})
         return data["locations"]
 
     def getLocationById(self, country_id: int):
@@ -61,5 +61,5 @@ class LocationBased:
         :param country_id: Country Id, an int
         :return: A dictionary with case information for the specified location.
         """
-        data = self._request("/v2/locations/" + str(country_id))
+        data = self.request("/v2/locations/" + str(country_id))
         return data["location"]

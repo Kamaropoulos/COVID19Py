@@ -1,6 +1,6 @@
 class OverviewBased:
     def getAll(self, timelines=False):
-        self._update(timelines)
+        self.update(timelines)
         return self.latestData
 
     def getLatestChanges(self):
@@ -23,5 +23,5 @@ class OverviewBased:
         """
         :return: The latest amount of total confirmed cases, deaths, and recoveries.
         """
-        data = self._request("/v2/latest")
+        data = self.request("/v2/latest")
         return data["latest"]

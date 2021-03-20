@@ -1,14 +1,17 @@
 from typing import Dict, List
 import requests
 import json
+from .network import NetworkRelated
+from .overview import OverviewBased
+from .location import LocationBased
 
-class COVID19(object):
+class COVID19:
     default_url = "https://covid-tracker-us.herokuapp.com"
     url = ""
     data_source = ""
     previousData = None
     latestData = None
-    _valid_data_sources = []
+    valid_data_sources = []
 
     mirrors_source = "https://raw.github.com/Kamaropoulos/COVID19Py/master/mirrors.json"
     mirrors = None
@@ -27,7 +30,7 @@ class COVID19(object):
                 self.url = mirror["url"]
                 result = None
                 try:
-                    result = self._getSources()
+                    result = self.getSources()
                 except Exception as e:
                     # URL did not work, reset it and move on
                     self.url = ""
@@ -44,29 +47,7 @@ class COVID19(object):
         else:
             self.url = url
 
-        self._valid_data_sources = self._getSources()
-        if data_source not in self._valid_data_sources:
-            raise ValueError("Invalid data source. Expected one of: %s" % self._valid_data_sources)
+        self.valid_data_sources = self.getSources()
+        if data_source not in self.valid_data_sources:
+            raise ValueError("Invalid data source. Expected one of: %s" % self.valid_data_sources)
         self.data_source = data_source
-
-    def _update(self, timelines):
-        latest = self.getLatest()
-        locations = self.getLocations(timelines)
-        if self.latestData:
-            self.previousData = self.latestData
-        self.latestData = {
-            "latest": latest,
-            "locations": locations
-        }
-
-    def _getSources(self):
-        response = requests.get(self.url + "/v2/sources")
-        response.raise_for_status()
-        return response.json()["sources"]
-
-    def _request(self, endpoint, params=None):
-        if params is None:
-            params = {}
-        response = requests.get(self.url + endpoint, {*params, "source":self.data_source})
-        response.raise_for_status()
-        return response.json()
