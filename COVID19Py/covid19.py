@@ -465,28 +465,11 @@ class CaseByCountry():
                     
 
         def __str__(self):
-            if (self.nameOfCount_check or self.Count_Code_check or self.Count_num_check ) == False :
-                return("No input received")
+           
 
             if (self.nameOfCount).capitalize() not in country_dict:
                 return("Country does not exists")  
 
 
             return ( "{: <15} ({}) num={}".format(self.nameOfCount,self.Count_Code,self.Count_num))
-###########################################################################################################
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-    
-
+            ###########################################################################################################
