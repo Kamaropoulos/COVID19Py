@@ -99,60 +99,86 @@ class COVID19(object):
         return data["latest"]
 
     def getLocations(self, timelines=False, rank_by: str = None) -> List[Dict]:
+            """
+            Gets all locations affected by COVID-19, as well as latest case data.
+            :param timelines: Whether timeline information should be returned as well.
+            :param rank_by: Category to rank results by. ex: confirmed
+            :return: List of dictionaries representing all affected locations.
+            """
+            locations = locationRequest(None, 0, timelines)
+            return locations.allData(self, rank_by)
+
+    def getLocationByCountryCode(self, country_code, timelines=False) -> List[Dict]:
+            """
+            :param country_code: String denoting the ISO 3166-1 alpha-2 code (https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) of the country
+            :param timelines: Whether timeline information should be returned as well.
+            :return: A list of areas that correspond to the country_code. If the country_code is invalid, it returns an empty list.
+            """
+            countryGet = locationRequest(country_code, 1, timelines)
+            return countryGet.dataUpdate()
+
+    def getLocationByCountry(self, country, timelines=False) -> List[Dict]:
+            """
+            :param country: String denoting name of the country
+            :param timelines: Whether timeline information should be returned as well.
+            :return: A list of areas that correspond to the country name. If the country is invalid, it returns an empty list.
+            """
+            countryGet = locationRequest(country, 2, timelines)
+            return countryGet.dataUpdate()
+
+    def getLocationById(self, country_id: int):
+            """
+            :param country_id: Country Id, an int
+            :return: A dictionary with case information for the specified location.
+            """
+            ID = locationRequest(country_id, 3, None)
+            return ID.dataUpdate()
+
+class locationRequest:
+    def __init__(self, countryInfo, type, timelines):
+        self.countryInfo = countryInfo
+        self.type = type
+        self.timelines = timelines
+
         """
-        Gets all locations affected by COVID-19, as well as latest case data.
-        :param timelines: Whether timeline information should be returned as well.
-        :param rank_by: Category to rank results by. ex: confirmed
-        :return: List of dictionaries representing all affected locations.
+            Takes data sent to location request, and uses the decided input type to send a request for the specified location
+            All location requests will be sent to the init and the call update
         """
+
+    def dataUpdate(self) -> List[Dict]:
+        data = None
+        if (self.type == 1):
+            if self.timelines:
+                data = self._request("/v2/locations",
+                                     {"country_code": self.countryInfo, "timelines": str(self.timelines).lower()})
+            else:
+                data = self._request("/v2/locations", {"country_code": self.countryInfo})
+            return data["locations"]
+        elif (self.type == 2):
+            if self.timelines:
+                data = self._request("/v2/locations",
+                                     {"country": self.countryInfo, "timelines": str(self.timelines).lower()})
+            else:
+                data = self._request("/v2/locations", {"country": self.countryInfo})
+            return data["locations"]
+        else:
+            data = self._request("/v2/locations/" + str(self.countryInfo))
+            return data["location"]
+
+    def allData(self, rank_by) -> List[Dict]:
         data = None
         if timelines:
             data = self._request("/v2/locations", {"timelines": str(timelines).lower()})
         else:
             data = self._request("/v2/locations")
 
-        data = data["locations"]
-        
-        ranking_criteria = ['confirmed', 'deaths', 'recovered']
+            data = data["locations"]
+
+            ranking_criteria = ['confirmed', 'deaths', 'recovered']
         if rank_by is not None:
             if rank_by not in ranking_criteria:
                 raise ValueError("Invalid ranking criteria. Expected one of: %s" % ranking_criteria)
 
             ranked = sorted(data, key=lambda i: i['latest'][rank_by], reverse=True)
             data = ranked
-
         return data
-
-    def getLocationByCountryCode(self, country_code, timelines=False) -> List[Dict]:
-        """
-        :param country_code: String denoting the ISO 3166-1 alpha-2 code (https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) of the country
-        :param timelines: Whether timeline information should be returned as well.
-        :return: A list of areas that correspond to the country_code. If the country_code is invalid, it returns an empty list.
-        """
-        data = None
-        if timelines:
-            data = self._request("/v2/locations", {"country_code": country_code, "timelines": str(timelines).lower()})
-        else:
-            data = self._request("/v2/locations", {"country_code": country_code})
-        return data["locations"]
-    
-    def getLocationByCountry(self, country, timelines=False) -> List[Dict]:
-        """
-        :param country: String denoting name of the country
-        :param timelines: Whether timeline information should be returned as well.
-        :return: A list of areas that correspond to the country name. If the country is invalid, it returns an empty list.
-        """
-        data = None
-        if timelines:
-            data = self._request("/v2/locations", {"country": country, "timelines": str(timelines).lower()})
-        else:
-            data = self._request("/v2/locations", {"country": country})
-        return data["locations"]
-
-    def getLocationById(self, country_id: int):
-        """
-        :param country_id: Country Id, an int
-        :return: A dictionary with case information for the specified location.
-        """
-        data = self._request("/v2/locations/" + str(country_id))
-        return data["location"]
