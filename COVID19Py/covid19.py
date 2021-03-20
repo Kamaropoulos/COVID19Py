@@ -2,7 +2,6 @@ from typing import Dict, List
 import requests
 import json
 
-
 class COVID19(object):
     default_url = "https://covid-tracker-us.herokuapp.com"
     url = ""
@@ -47,8 +46,7 @@ class COVID19(object):
 
         self._valid_data_sources = self._getSources()
         if data_source not in self._valid_data_sources:
-            raise ValueError(
-                "Invalid data source. Expected one of: %s" % self._valid_data_sources)
+            raise ValueError("Invalid data source. Expected one of: %s" % self._valid_data_sources)
         self.data_source = data_source
 
     def _update(self, timelines):
@@ -69,6 +67,6 @@ class COVID19(object):
     def _request(self, endpoint, params=None):
         if params is None:
             params = {}
-        response = requests.get(self.url + endpoint, {*params, "source": self.data_source})
+        response = requests.get(self.url + endpoint, {*params, "source":self.data_source})
         response.raise_for_status()
         return response.json()
