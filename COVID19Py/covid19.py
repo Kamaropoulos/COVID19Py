@@ -473,3 +473,10 @@ class CaseByCountry():
 
             return ( "{: <15} ({}) num={}".format(self.nameOfCount,self.Count_Code,self.Count_num))
             ###########################################################################################################
+
+#Testing
+#def main():
+#    CovData = COVID19(fetchData())
+#    print(CovData.getLocationData(CaseByCountry(nameOfCount=="Canada")))
+#if __name__ == '__main__':
+ #   main() 
