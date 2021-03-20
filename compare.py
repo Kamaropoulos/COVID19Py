@@ -33,7 +33,6 @@ class compare():
                     self.url = ""
                     continue
 
-                # TODO: Should have a better health-check, this is way too hacky...
                 if "jhu" in result:
                     # We found a mirror that worked just fine, let's stick with it
                     break
