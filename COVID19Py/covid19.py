@@ -135,9 +135,9 @@ class COVID19(object):
             return ID.dataUpdate()
 
 class locationRequest:
-    def __init__(self, countryInfo, type, timelines):
+    def __init__(self, countryInfo, typeN, timelines):
         self.countryInfo = countryInfo
-        self.type = type
+        self.typeN = typeN
         self.timelines = timelines
 
         """
@@ -147,23 +147,21 @@ class locationRequest:
 
     def dataUpdate(self) -> List[Dict]:
         data = None
-        if (self.type == 1):
+        if (self.typeN == 1):
             if self.timelines:
                 data = self._request("/v2/locations",
                                      {"country_code": self.countryInfo, "timelines": str(self.timelines).lower()})
             else:
                 data = self._request("/v2/locations", {"country_code": self.countryInfo})
-            return data["locations"]
-        elif (self.type == 2):
+        elif (self.typeN == 2):
             if self.timelines:
                 data = self._request("/v2/locations",
                                      {"country": self.countryInfo, "timelines": str(self.timelines).lower()})
             else:
                 data = self._request("/v2/locations", {"country": self.countryInfo})
-            return data["locations"]
         else:
             data = self._request("/v2/locations/" + str(self.countryInfo))
-            return data["location"]
+        return data["location"]
 
     def allData(self, rank_by) -> List[Dict]:
         data = None
