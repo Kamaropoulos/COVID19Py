@@ -46,7 +46,8 @@ class COVID19(object):
 
         self._valid_data_sources = self._getSources()
         if data_source not in self._valid_data_sources:
-            raise ValueError("Invalid data source. Expected one of: %s" % self._valid_data_sources)
+            raise ValueError(
+                "Invalid data source. Expected one of: %s" % self._valid_data_sources)
         self.data_source = data_source
 
     def _update(self, timelines):
@@ -67,7 +68,8 @@ class COVID19(object):
     def _request(self, endpoint, params=None):
         if params is None:
             params = {}
-        response = requests.get(self.url + endpoint, {**params, "source":self.data_source})
+        response = requests.get(self.url + endpoint,
+                                {**params, "source": self.data_source})
         response.raise_for_status()
         return response.json()
 
@@ -107,18 +109,21 @@ class COVID19(object):
         """
         data = None
         if timelines:
-            data = self._request("/v2/locations", {"timelines": str(timelines).lower()})
+            data = self._request(
+                "/v2/locations", {"timelines": str(timelines).lower()})
         else:
             data = self._request("/v2/locations")
 
         data = data["locations"]
-        
+
         ranking_criteria = ['confirmed', 'deaths', 'recovered']
         if rank_by is not None:
             if rank_by not in ranking_criteria:
-                raise ValueError("Invalid ranking criteria. Expected one of: %s" % ranking_criteria)
+                raise ValueError(
+                    "Invalid ranking criteria. Expected one of: %s" % ranking_criteria)
 
-            ranked = sorted(data, key=lambda i: i['latest'][rank_by], reverse=True)
+            ranked = sorted(
+                data, key=lambda i: i['latest'][rank_by], reverse=True)
             data = ranked
 
         return data
@@ -131,11 +136,13 @@ class COVID19(object):
         """
         data = None
         if timelines:
-            data = self._request("/v2/locations", {"country_code": country_code, "timelines": str(timelines).lower()})
+            data = self._request(
+                "/v2/locations", {"country_code": country_code, "timelines": str(timelines).lower()})
         else:
-            data = self._request("/v2/locations", {"country_code": country_code})
+            data = self._request(
+                "/v2/locations", {"country_code": country_code})
         return data["locations"]
-    
+
     def getLocationByCountry(self, country, timelines=False) -> List[Dict]:
         """
         :param country: String denoting name of the country
@@ -144,7 +151,8 @@ class COVID19(object):
         """
         data = None
         if timelines:
-            data = self._request("/v2/locations", {"country": country, "timelines": str(timelines).lower()})
+            data = self._request(
+                "/v2/locations", {"country": country, "timelines": str(timelines).lower()})
         else:
             data = self._request("/v2/locations", {"country": country})
         return data["locations"]
