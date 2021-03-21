@@ -49,7 +49,7 @@ class COVID19(object):
             raise ValueError("Invalid data source. Expected one of: %s" % self._valid_data_sources)
         self.data_source = data_source
 
-    def _update(self, timelines):
+    def update(self, timelines):
         latest = self.getLatest()
         locations = self.getLocations(timelines)
         if self.latestData:
@@ -64,7 +64,7 @@ class COVID19(object):
         response.raise_for_status()
         return response.json()["sources"]
 
-    def _request(self, endpoint, params=None):
+    def request(self, endpoint, params=None):
         if params is None:
             params = {}
         response = requests.get(self.url + endpoint, {**params, "source":self.data_source})
@@ -72,7 +72,7 @@ class COVID19(object):
         return response.json()
 
     def getAll(self, timelines=False):
-        self._update(timelines)
+        self.update(timelines)
         return self.latestData
 
     def getLatestChanges(self):
@@ -95,7 +95,7 @@ class COVID19(object):
         """
         :return: The latest amount of total confirmed cases, deaths, and recoveries.
         """
-        data = self._request("/v2/latest")
+        data = self.request("/v2/latest")
         return data["latest"]
 
     def getLocations(self, timelines=False, rank_by: str = None) -> List[Dict]:
@@ -107,9 +107,9 @@ class COVID19(object):
         """
         data = None
         if timelines:
-            data = self._request("/v2/locations", {"timelines": str(timelines).lower()})
+            data = self.request("/v2/locations", {"timelines": str(timelines).lower()})
         else:
-            data = self._request("/v2/locations")
+            data = self.request("/v2/locations")
 
         data = data["locations"]
         
@@ -131,9 +131,9 @@ class COVID19(object):
         """
         data = None
         if timelines:
-            data = self._request("/v2/locations", {"country_code": country_code, "timelines": str(timelines).lower()})
+            data = self.request("/v2/locations", {"country_code": country_code, "timelines": str(timelines).lower()})
         else:
-            data = self._request("/v2/locations", {"country_code": country_code})
+            data = self.request("/v2/locations", {"country_code": country_code})
         return data["locations"]
     
     def getLocationByCountry(self, country, timelines=False) -> List[Dict]:
@@ -144,9 +144,9 @@ class COVID19(object):
         """
         data = None
         if timelines:
-            data = self._request("/v2/locations", {"country": country, "timelines": str(timelines).lower()})
+            data = self.request("/v2/locations", {"country": country, "timelines": str(timelines).lower()})
         else:
-            data = self._request("/v2/locations", {"country": country})
+            data = self.request("/v2/locations", {"country": country})
         return data["locations"]
 
     def getLocationById(self, country_id: int):
@@ -154,5 +154,5 @@ class COVID19(object):
         :param country_id: Country Id, an int
         :return: A dictionary with case information for the specified location.
         """
-        data = self._request("/v2/locations/" + str(country_id))
+        data = self.request("/v2/locations/" + str(country_id))
         return data["location"]
