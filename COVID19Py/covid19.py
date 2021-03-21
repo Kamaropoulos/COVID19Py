@@ -12,7 +12,7 @@ class COVID19(object):
 
     def getAll(self, timelines=False):
         """
-        :param timelines: Whether timeline information should be returned as well.
+        :param timelines: Whether timeline information should be returned as well
         :return: all Covid data numbers from around the world.
         """
        self.obj.getAll(timelines=timelines)
