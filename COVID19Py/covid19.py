@@ -2,7 +2,7 @@ from typing import Dict, List
 import requests
 import json
 
-class getDATA(object):
+class COVID19(object):
     default_url = "https://covid-tracker-us.herokuapp.com"
     url = ""
     data_source = ""
@@ -49,7 +49,7 @@ class getDATA(object):
             raise ValueError("Invalid data source. Expected one of: %s" % self._valid_data_sources)
         self.data_source = data_source
 
-    def update(self, timelines):
+    def _update(self, timelines):
         latest = self.getLatest()
         locations = self.getLocations(timelines)
         if self.latestData:
@@ -71,9 +71,8 @@ class getDATA(object):
         response.raise_for_status()
         return response.json()
 
-class COVID19(object):
     def getAll(self, timelines=False):
-        self.update(timelines)
+        self._update(timelines)
         return self.latestData
 
     def getLatestChanges(self):
@@ -99,6 +98,10 @@ class COVID19(object):
         data = self.request("/v2/latest")
         return data["latest"]
 
+class Locations(object):
+    previousData = None
+    latestData = None
+    
     def getLocations(self, timelines=False, rank_by: str = None) -> List[Dict]:
         """
         Gets all locations affected by COVID-19, as well as latest case data.
