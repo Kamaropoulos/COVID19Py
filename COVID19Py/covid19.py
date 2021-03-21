@@ -8,7 +8,7 @@ class COVID19(object):
     def __init__(self, url=default_url, data_source='jhu'):
       self.url = url
       self.data_source = data_source
-      self.obj = COVID19(self.url, self.data_source)
+      self.obj = GetData(self.url, self.data_source)
 
     def getAll(self, timelines=False):
         """
