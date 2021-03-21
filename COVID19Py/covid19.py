@@ -475,8 +475,8 @@ class CaseByCountry():
             ###########################################################################################################
 
 #Testing
-#def main():
-#    CovData = COVID19(fetchData())
-#    print(CovData.getLocationData(CaseByCountry(nameOfCount=="Canada")))
-#if __name__ == '__main__':
- #   main() 
+def main():
+    CovData = COVID19(fetchData())
+    print(CovData.getCountInfo(CaseByCountry(nameOfCount="Canada")))
+if __name__ == '__main__':
+    main() 
