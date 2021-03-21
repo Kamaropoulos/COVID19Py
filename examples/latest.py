@@ -1,7 +1,5 @@
 import COVID19Py
 
-covid19 = COVID19Py.COVID19(data_source="csbs")
+covid19 = COVID19Py.COVID19()
 
-location = covid19.getLocationByCountryCode("US")
 print(covid19.getLatest())
-print(location)
