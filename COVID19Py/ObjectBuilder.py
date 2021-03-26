@@ -34,7 +34,6 @@ class ObjectBuilder(InterfaceBuilder):
             response = requests.get(self.product.mirrors_source)
             response.raise_for_status()
             self.product.mirrors = response.json()
-
             # Try to get sources as a test
             for mirror in self.product.mirrors:
                 # Set URL of mirror
@@ -66,7 +65,7 @@ class ObjectBuilder(InterfaceBuilder):
     def setDataSource(self,data_source):
        
         self.product._valid_data_sources = self.product._getSources()
-       
+        
         if data_source not in self.product._valid_data_sources:
             raise ValueError("Invalid data source. Expected one of: %s" % self._valid_data_sources)
         self.product.data_source = data_source
@@ -78,8 +77,15 @@ class ObjectBuilder(InterfaceBuilder):
 
         
 class Director:
+
     @staticmethod
-    def construct(url="https://covid-tracker-us.herokuapp.com", dataSource='jhu'):
-        return ObjectBuilder().setURL(url).setDataSource(dataSource).getProduct()
- 
+    def constructURL(obj=ObjectBuilder(),url="https://covid-tracker-us.herokuapp.com"):
+        return obj.setURL(url)
+    @staticmethod
+    def constructDataSource(obj=ObjectBuilder(),dataSource='jhu'):
+        return obj.setDataSource(dataSource)
+    @staticmethod
+    def contructWholeProduct(obj=ObjectBuilder(),url="https://covid-tracker-us.herokuapp.com", dataSource='jhu'):
+        return obj.setURL(url).setDataSource(dataSource).getProduct()
+    
         
