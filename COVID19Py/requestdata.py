@@ -1,3 +1,4 @@
+from typing import Dict, List
 import requests
 
 class RequestData:
@@ -8,9 +9,10 @@ class RequestData:
         if params is None:
             self._params = params
 
-    def requestData(self):
+    def requestData(self) -> Dict:
         """
-        This method requests the based on the class's URL, data_source, and params
+        This method requests the based on the class's URL, data_source, and params.
+
         :return: dictionary containing the requested data
         """
         if self._params is None:
@@ -19,9 +21,11 @@ class RequestData:
         response.raise_for_status()
         return response.json()
 
-    def getSources(self):
+    def getSources(self) -> List:
         """
-        :return: 
+        This function returns an array of the source names
+
+        :return: list[str]
         """
         response = requests.get(self._url)
         response.raise_for_status()

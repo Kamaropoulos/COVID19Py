@@ -1,13 +1,13 @@
-from typing import Dict, List
 from .requestdata import RequestData
+from .datafetcher_implement import DataFetcherImplementation
+from typing import Dict, List
 from contracts import contract
-from .singleton import SingletonPatternType
 import requests
 
 
-class COVID19(object, metaclass=SingletonPatternType):
+class COVID19(DataFetcherImplementation):
     """
-    This class follows the Singleton Design Pattern, i.e. any two instances of the class will always be equal.
+    This class represents the concrete implementing class, that implements `DataFetcherImplementation` interface.
     """
     _requestURL = ""
     _default_url = "https://covid-tracker-us.herokuapp.com"
@@ -59,7 +59,7 @@ class COVID19(object, metaclass=SingletonPatternType):
         self._data_source = data_source
 
     @contract(timelines='bool')
-    def _update(self, timelines):
+    def update(self, timelines):
         """
         This function updates the `latestData` variable by setting it to the up-to-data data fetched from the source.
         It also updates the `previousData`, if there was a `latestData` that previously existed.
@@ -84,7 +84,7 @@ class COVID19(object, metaclass=SingletonPatternType):
         :param timelines: bool: value that represents the choice of user to receiver or not to receive data with corresponding timelime.
         :return: dictionary containing the data
         """
-        self._update(timelines)
+        self.update(timelines)
         return self._latestData
 
     @contract(returns='dict(str:int)')
