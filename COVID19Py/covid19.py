@@ -156,3 +156,8 @@ class COVID19(object):
         """
         data = self._request("/v2/locations/" + str(country_id))
         return data["location"]
+
+    def getCountry(self, country_id: int, country, country_code):
+
+        data = self._request("/v2/locations", {"country": country, "country_code": country_code} + str(country_id))
+        return data["location"]
