@@ -1,8 +1,9 @@
 from typing import Dict, List
 import requests
 import json
+from abstractCoronavirus import AbstractCoronavirus
 
-class COVID19(object):
+class COVID19(AbstractCoronavirus):
     previousData = None
     latestData = None
     def __init__(self):
