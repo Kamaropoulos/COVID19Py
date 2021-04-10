@@ -2,16 +2,30 @@ from typing import Dict, List
 import requests
 import json
 
-class WORKER(object):
+class COVID19(object):
     default_url = "https://covid-tracker-us.herokuapp.com"
     url = ""
     data_source = ""
+    previousData = None
+    latestData = None
     _valid_data_sources = []
 
     mirrors_source = "https://raw.github.com/Kamaropoulos/COVID19Py/master/mirrors.json"
     mirrors = None
 
+    __singleton_instance = None
+
+    @staticmethod
+    def getInstance():
+        if COVID19.__singleton_instance == None:
+            COVID19()
+        return COVID19.__singleton_instance
+
     def __init__(self, url="https://covid-tracker-us.herokuapp.com", data_source='jhu'):
+        if COVID19.__singleton_instance != None:
+            raise Exception("Should not create a new instance; using singleton pattern")
+        else:
+            COVID19.__singleton_instance = self
         # Skip mirror checking if custom url was passed
         if url == self.default_url:
             # Load mirrors
@@ -47,26 +61,6 @@ class WORKER(object):
             raise ValueError("Invalid data source. Expected one of: %s" % self._valid_data_sources)
         self.data_source = data_source
 
-    def _getSources(self):
-        response = requests.get(self.url + "/v2/sources")
-        response.raise_for_status()
-        return response.json()["sources"]
-
-    def request(self, endpoint, params=None):
-        if params is None:
-            params = {}
-        response = requests.get(self.url + endpoint, {**params, "source":self.data_source})
-        response.raise_for_status()
-        return response.json()
-
-
-class COVID19(object):
-    previousData = None
-    latestData = None
-
-    def __init__(self, worker):
-        self.worker = worker
-
     def _update(self, timelines):
         latest = self.getLatest()
         locations = self.getLocations(timelines)
@@ -76,6 +70,18 @@ class COVID19(object):
             "latest": latest,
             "locations": locations
         }
+
+    def _getSources(self):
+        response = requests.get(self.url + "/v2/sources")
+        response.raise_for_status()
+        return response.json()["sources"]
+
+    def _request(self, endpoint, params=None):
+        if params is None:
+            params = {}
+        response = requests.get(self.url + endpoint, {**params, "source":self.data_source})
+        response.raise_for_status()
+        return response.json()
 
     def getAll(self, timelines=False):
         self._update(timelines)
@@ -101,7 +107,7 @@ class COVID19(object):
         """
         :return: The latest amount of total confirmed cases, deaths, and recoveries.
         """
-        data = self.worker.request("/v2/latest")
+        data = self._request("/v2/latest")
         return data["latest"]
 
     def getLocations(self, timelines=False, rank_by: str = None) -> List[Dict]:
@@ -113,9 +119,9 @@ class COVID19(object):
         """
         data = None
         if timelines:
-            data = self.worker.request("/v2/locations", {"timelines": str(timelines).lower()})
+            data = self._request("/v2/locations", {"timelines": str(timelines).lower()})
         else:
-            data = self.worker.request("/v2/locations")
+            data = self._request("/v2/locations")
 
         data = data["locations"]
         
@@ -137,9 +143,9 @@ class COVID19(object):
         """
         data = None
         if timelines:
-            data = self.worker.request("/v2/locations", {"country_code": country_code, "timelines": str(timelines).lower()})
+            data = self._request("/v2/locations", {"country_code": country_code, "timelines": str(timelines).lower()})
         else:
-            data = self.worker.request("/v2/locations", {"country_code": country_code})
+            data = self._request("/v2/locations", {"country_code": country_code})
         return data["locations"]
     
     def getLocationByCountry(self, country, timelines=False) -> List[Dict]:
@@ -150,9 +156,9 @@ class COVID19(object):
         """
         data = None
         if timelines:
-            data = self.worker.request("/v2/locations", {"country": country, "timelines": str(timelines).lower()})
+            data = self._request("/v2/locations", {"country": country, "timelines": str(timelines).lower()})
         else:
-            data = self.worker.request("/v2/locations", {"country": country})
+            data = self._request("/v2/locations", {"country": country})
         return data["locations"]
 
     def getLocationById(self, country_id: int):
@@ -160,5 +166,5 @@ class COVID19(object):
         :param country_id: Country Id, an int
         :return: A dictionary with case information for the specified location.
         """
-        data = self.worker.request("/v2/locations/" + str(country_id))
+        data = self._request("/v2/locations/" + str(country_id))
         return data["location"]
