@@ -26,7 +26,21 @@ class COVID19(object):
 
     mirrors_source = "https://raw.github.com/Kamaropoulos/COVID19Py/master/mirrors.json"
     mirrors = None
-
+    
+       # ------------ A FACTORY METHOD IS DEFINED (THAT COMES UNDER CREATIONAL (FACTORY ) DESIGN PATTERN) ----------------------------
+    # THIS METHOD IS USED WHEN WE WANT TO ADD NEW FUNCTION FOR EXTRACTIING DATA IN NEW FORMAT, THEN WE CAN JUST ADD THAT FUNCTION
+    # TO THIS FACTORY METHOD AND SIMPLY DEFINE THE FUNCTION WITHOUT ALTERING THE OTHER FUNCTION OF THE CODE --------------------
+    def factory(self):
+        localizer = {
+            "stateCode" : fromStateCode,
+            "countryCode": fromCountryCode,
+            "districtCode": fromDistrictCode,
+            "districtID" : fromDistrictID,
+            "stateID": fromStateID,
+            "countryID": fromCountryID,
+        }
+    # ------------------------------------------------------------------------------------------------------------------ 
+    
     # ======================================================================================================================
     # __init__ method is defined which is considered to be the constructor of the class COVID19
     def __init__(self, url="https://covid-tracker-us.herokuapp.com", data_source='csbs'):
@@ -173,8 +187,9 @@ class COVID19(object):
         else:
             data = self.permission("/v2/locations", {"state_code": state_code})
         return data["locations"]
-
-    # ======================================================================================================================
+     
+        # factory("stateCode")
+        # ======================================================================================================================
     # implemented to get data with the help of countrycode
     def fromCountryCode(self, country_code, timelines=False) -> List[Dict]:
         # print("fromCountryCode")
