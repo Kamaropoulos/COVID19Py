@@ -1,119 +1,163 @@
 from typing import Dict, List
 import requests
-import json
+import json # -------------------------- THIS IS THE PART OF STRUCTURAL(ADAPTER PATTERN) CODE --------------------------
+            # WE HAVE IMPORTED THIS JSON BECAUSE WE NEED TO DISPLAY THE OUTPUT IN FORM OF JSON, BECAUSE THE DATA IN THE
+            # DATASOURCE IS IN XML FILE AND WE CANNOT DIRECTLY SHOW THE OUTPUT IN XML FORMAT, SO IT WILL BE EASY TO DISPLAY
+            # THE OUTPUT IN JSON (LIST OF DICTIONARY FORMAT) THERE FORE WE HAVE THIS
 
 
+# class COVID19 is defined , to store definition of each methods used
 class COVID19(object):
+    # print("inside class")
+    # we have taken this link as default url
     default_url = "https://covid-tracker-us.herokuapp.com"
+
+    # an empty string url is taken
     url = ""
+
+    # an empty string datasource is taken
     data_source = ""
+
+    # previous data is initialized as None
     previousData = None
+
+    # latest data is initialized as None
     latestData = None
+
+    # list _valid_data_sources is defined and kept empty initially
     _valid_data_sources = []
 
     mirrors_source = "https://raw.github.com/Kamaropoulos/COVID19Py/master/mirrors.json"
     mirrors = None
 
-    def __init__(self, url="https://covid-tracker-us.herokuapp.com", data_source='jhu'):
-        # Skip mirror checking if custom url was passed
+    # ------------ A FACTORY METHOD IS DEFINED (THAT COMES UNDER CREATIONAL (FACTORY ) DESIGN PATTERN) ----------------------------
+    # THIS METHOD IS USED WHEN WE WANT TO ADD NEW FUNCTION FOR EXTRACTIING DATA IN NEW FORMAT, THEN WE CAN JUST ADD THAT FUNCTION
+    # TO THIS FACTORY METHOD AND SIMPLY DEFINE THE FUNCTION WITHOUT ALTERING THE OTHER FUNCTION OF THE CODE --------------------
+    def factory(self):
+        localizer = {
+            "stateCode" : fromStateCode,
+            "countryCode": fromCountryCode,
+            "districtCode": fromDistrictCode,
+            "districtID" : fromDistrictID,
+            "stateID": fromStateID,
+            "countryID": fromCountryID,
+        }
+    # ------------------------------------------------------------------------------------------------------------------
+
+    # ======================================================================================================================
+    # __init__ method is defined which is considered to be the constructor of the class COVID19
+    def __init__(self, url="https://covid-tracker-us.herokuapp.com", data_source='csbs'):
+
+        # print("inside __init__")
+        # if url we passed through is same as the default url, we will not check mirror
         if url == self.default_url:
-            # Load mirrors
+            # print("if")
+            # we directly load the mirrors
             response = requests.get(self.mirrors_source)
             response.raise_for_status()
             self.mirrors = response.json()
 
             # Try to get sources as a test
             for mirror in self.mirrors:
+                # print("mirror for loop")
                 # Set URL of mirror
                 self.url = mirror["url"]
                 result = None
                 try:
-                    result = self._getSources()
+                    result = self.fromSources()
                 except Exception as e:
                     # URL did not work, reset it and move on
                     self.url = ""
                     continue
 
-                # TODO: Should have a better health-check, this is way too hacky...
-                if "jhu" in result:
-                    # We found a mirror that worked just fine, let's stick with it
+                if "csbs" in result:
+                    # print("jhu in result")
                     break
 
-                # None of the mirrors worked. Raise an error to inform the user.
+                # Raise the RuntimeError when no mirror worked
                 raise RuntimeError("No available API mirror was found.")
 
         else:
+            # print("print else")
             self.url = url
 
-        self._valid_data_sources = self._getSources()
+        self._valid_data_sources = self.fromSources()
         if data_source not in self._valid_data_sources:
+            # print("if not in")
             raise ValueError("Invalid data source. Expected one of: %s" % self._valid_data_sources)
         self.data_source = data_source
 
-    def _update(self, timelines):
-        latest = self.getLatest()
-        locations = self.getLocations(timelines)
+    # ======================================================================================================================
+    # function new1 defined in such a way so that we can check if there is anything new happened
+    def new1(self, timelines):
+        # print("update")
+        latest = self.fromlat()
+        locations = self.fromloc(timelines)
         if self.latestData:
             self.previousData = self.latestData
-        self.latestData = {
+        self.latestData = { # -------------- THIS IS HOW THE LATEST DATA IS VISIBLE USING JSON CODE FORMAT
+                            # THIS IS ALSO THE PART OF STRUCTURAL(ADAPTER METHOD) ---------------------
             "latest": latest,
             "locations": locations
         }
 
-    def _getSources(self):
+    # ======================================================================================================================
+    # function fromSources defined to get the sources
+    def fromSources(self):
+        # print("fromSources")
         response = requests.get(self.url + "/v2/sources")
         response.raise_for_status()
         return response.json()["sources"]
 
-    def _request(self, endpoint, params=None):
+    # ======================================================================================================================
+    # function permission defined to take the permission
+    def permission(self, endpoint, params=None):
+        # print("permission")
         if params is None:
             params = {}
-        response = requests.get(self.url + endpoint, {**params, "source":self.data_source})
+        response = requests.get(self.url + endpoint, {**params, "source": self.data_source})
         response.raise_for_status()
         return response.json()
 
-    def getAll(self, timelines=False):
-        self._update(timelines)
-        return self.latestData
+    # ======================================================================================================================
+    # function get1 defined to get all the data
+    def get1(self, timelines=False):
+        # print("get1")
+        self.new1(timelines)
+        return self.latestData # THIS LATESTDATA IS RETURN IN FORM OF JSON FORMAT -------------------------
 
-    def getLatestChanges(self):
+    # ======================================================================================================================
+    # function defined to check for changes
+    def fromChanges(self):
+        # print("fromChanges")
         changes = None
         if self.previousData:
-            changes = {
-                "confirmed": self.latestData["latest"]["confirmed"] - self.latestData["latest"]["confirmed"],
-                "deaths": self.latestData["latest"]["deaths"] - self.latestData["latest"]["deaths"],
-                "recovered": self.latestData["latest"]["recovered"] - self.latestData["latest"]["recovered"],
-            }
+            # print("latest changes if")
+            changes = { "confirmed": self.latestData["latest"]["confirmed"] - self.latestData["latest"]["confirmed"], "deaths": self.latestData["latest"]["deaths"] - self.latestData["latest"]["deaths"], "recovered": self.latestData["latest"]["recovered"] - self.latestData["latest"]["recovered"], }
         else:
-            changes = {
-                "confirmed": 0,
-                "deaths": 0,
-                "recovered": 0,
-            }
+            # print("latest changes else")
+            changes = { "confirmed": 0, "deaths": 0, "recovered": 0, }
         return changes
 
-    def getLatest(self) -> List[Dict[str, int]]:
-        """
-        :return: The latest amount of total confirmed cases, deaths, and recoveries.
-        """
-        data = self._request("/v2/latest")
+    # ======================================================================================================================
+    def fromlat(self) -> List[Dict[str, int]]:
+        # print("fromlat")
+        data = self.permission("/v2/latest")
         return data["latest"]
 
-    def getLocations(self, timelines=False, rank_by: str = None) -> List[Dict]:
-        """
-        Gets all locations affected by COVID-19, as well as latest case data.
-        :param timelines: Whether timeline information should be returned as well.
-        :param rank_by: Category to rank results by. ex: confirmed
-        :return: List of dictionaries representing all affected locations.
-        """
+    # ======================================================================================================================
+    # function fromloc defined to get from the location
+    def fromloc(self, timelines=False, rank_by: str = None) -> List[Dict]:
+        # print("fromloc")
+
         data = None
         if timelines:
-            data = self._request("/v2/locations", {"timelines": str(timelines).lower()})
+            data = self.permission("/v2/locations", {"timelines": str(timelines).lower()})
         else:
-            data = self._request("/v2/locations")
+            data = self.permission("/v2/locations")
 
         data = data["locations"]
-        
+
         ranking_criteria = ['confirmed', 'deaths', 'recovered']
         if rank_by is not None:
             if rank_by not in ranking_criteria:
@@ -124,39 +168,99 @@ class COVID19(object):
 
         return data
 
-    def getLocationByCountryCode(self, country_code, timelines=False) -> List[Dict]:
-        """
-        :param country_code: String denoting the ISO 3166-1 alpha-2 code (https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) of the country
-        :param timelines: Whether timeline information should be returned as well.
-        :return: A list of areas that correspond to the country_code. If the country_code is invalid, it returns an empty list.
-        """
+    # ======================================================================================================================
+    # implemented to get data with the help of districtcode
+    def fromDistrictCode(self, district_code, timelines=False) -> List[Dict]:
+        # print("fromDistrictCode")
+
         data = None
         if timelines:
-            data = self._request("/v2/locations", {"country_code": country_code, "timelines": str(timelines).lower()})
+            data = self.permission("/v2/locations", {"district_code": district_code, "timelines": str(timelines).lower()})
         else:
-            data = self._request("/v2/locations", {"country_code": country_code})
-        return data["locations"]
-    
-    def getLocationByCountry(self, country, timelines=False) -> List[Dict]:
-        """
-        :param country: String denoting name of the country
-        :param timelines: Whether timeline information should be returned as well.
-        :return: A list of areas that correspond to the country name. If the country is invalid, it returns an empty list.
-        """
-        data = None
-        if timelines:
-            data = self._request("/v2/locations", {"country": country, "timelines": str(timelines).lower()})
-        else:
-            data = self._request("/v2/locations", {"country": country})
+            data = self.permission("/v2/locations", {"district_code": district_code})
         return data["locations"]
 
-    def getLocationById(self, country_id: int):
-        """
-        :param country_id: Country Id, an int
-        :return: A dictionary with case information for the specified location.
-        """
-        data = self._request("/v2/locations/" + str(country_id))
+    # ======================================================================================================================
+    # implemented to get data with the help of statecode
+    def fromStateCode(self, state_code, timelines=False) -> List[Dict]:
+        # print("fromStateCode")
+
+        data = None
+        if timelines:
+            data = self.permission("/v2/locations", {"state_code": state_code, "timelines": str(timelines).lower()})
+        else:
+            data = self.permission("/v2/locations", {"state_code": state_code})
+        return data["locations"]
+
+    # factory("stateCode")
+    # ======================================================================================================================
+    # implemented to get data with the help of countrycode
+    def fromCountryCode(self, country_code, timelines=False) -> List[Dict]:
+        # print("fromCountryCode")
+
+        data = None
+        if timelines:
+            data = self.permission("/v2/locations", {"country_code": country_code, "timelines": str(timelines).lower()})
+        else:
+            data = self.permission("/v2/locations", {"country_code": country_code})
+        return data["locations"]
+
+    # ======================================================================================================================
+    # implemented to get data with the help of country
+    def fromCountry(self, country, timelines=False) -> List[Dict]:
+        # print("fromCountry")
+
+        data = None
+        if timelines:
+            data = self.permission("/v2/locations", {"country": country, "timelines": str(timelines).lower()})
+        else:
+            data = self.permission("/v2/locations", {"country": country})
+        return data["locations"]
+
+    # ======================================================================================================================
+    # implemented to get data with the help of country
+    def fromState(self, state, timelines=False) -> List[Dict]:
+        # print("fromCountry")
+
+        data = None
+        if timelines:
+            data = self.permission("/v2/locations", {"state": state, "timelines": str(timelines).lower()})
+        else:
+            data = self.permission("/v2/locations", {"state": state})
+        return data["locations"]
+
+    # ======================================================================================================================
+    # implemented to get data with the help of country
+    def fromDistrict(self, district, timelines=False) -> List[Dict]:
+        # print("fromCountry")
+
+        data = None
+        if timelines:
+            data = self.permission("/v2/locations", {"district": district, "timelines": str(timelines).lower()})
+        else:
+            data = self.permission("/v2/locations", {"district": district})
+        return data["locations"]
+
+    # ======================================================================================================================
+    # implemented to get data with the help of Country id
+    def fromCountryId(self, country_id: int):
+        # print("fromCountryId")
+
+        data = self.permission("/v2/locations/" + str(country_id))
         return data["location"]
-    
-    
-    
+
+    # ======================================================================================================================
+    # implemented to get data with the help of State id
+    def fromStateId(self, state_id: int):
+        # print("fromStateId")
+
+        data = self.permission("/v2/locations/" + str(state_id))
+        return data["location"]
+
+    # ======================================================================================================================
+    # implemented to get data with the help of District id
+    def fromDistrictId(self, district_id: int):
+        # print("fromDistrictId")
+
+        data = self.permission("/v2/locations/" + str(state_id))
+        return data["location"]
