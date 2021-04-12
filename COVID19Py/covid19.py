@@ -1,8 +1,12 @@
 from typing import Dict, List
 import requests
+from .DataClass import _request
+from .covid19singleton import covid19singleton
+
 import json
 
-class COVID19(object):
+
+class COVID19(object,covid19singleton):
     default_url = "https://covid-tracker-us.herokuapp.com"
     url = ""
     data_source = ""
@@ -27,7 +31,9 @@ class COVID19(object):
                 self.url = mirror["url"]
                 result = None
                 try:
-                    result = self._getSources()
+                    endpoint = '/v2/sources'
+                    mydata = _request(self.url, self.data_source, endpoint)
+                    result = mydata.getSources()
                 except Exception as e:
                     # URL did not work, reset it and move on
                     self.url = ""
@@ -43,8 +49,9 @@ class COVID19(object):
 
         else:
             self.url = url
+        mydata = _request(self.url, self.data_source, endpoint)
+        self._valid_data_sources = mydata.getSources()
 
-        self._valid_data_sources = self._getSources()
         if data_source not in self._valid_data_sources:
             raise ValueError("Invalid data source. Expected one of: %s" % self._valid_data_sources)
         self.data_source = data_source
@@ -58,18 +65,6 @@ class COVID19(object):
             "latest": latest,
             "locations": locations
         }
-
-    def _getSources(self):
-        response = requests.get(self.url + "/v2/sources")
-        response.raise_for_status()
-        return response.json()["sources"]
-
-    def _request(self, endpoint, params=None):
-        if params is None:
-            params = {}
-        response = requests.get(self.url + endpoint, {**params, "source":self.data_source})
-        response.raise_for_status()
-        return response.json()
 
     def getAll(self, timelines=False):
         self._update(timelines)
@@ -95,8 +90,12 @@ class COVID19(object):
         """
         :return: The latest amount of total confirmed cases, deaths, and recoveries.
         """
-        data = self._request("/v2/latest")
-        return data["latest"]
+        endpoint = "/v2/latest"
+        mydata = _request(self.url, self.data_source, endpoint, params=None)
+        result = mydata._request()
+        return result
+
+
 
     def getLocations(self, timelines=False, rank_by: str = None) -> List[Dict]:
         """
@@ -105,23 +104,27 @@ class COVID19(object):
         :param rank_by: Category to rank results by. ex: confirmed
         :return: List of dictionaries representing all affected locations.
         """
-        data = None
+        mydata = None
+        endpoint = "/v2/locations"
         if timelines:
-            data = self._request("/v2/locations", {"timelines": str(timelines).lower()})
-        else:
-            data = self._request("/v2/locations")
 
-        data = data["locations"]
-        
+            mydata = _request(self.url, self.data_source, endpoint, params={"timelines": str(timelines).lower()})
+            mydata = mydata._request()
+        else:
+            mydata = _request(self.url, self.data_source, endpoint, params=None)
+            mydata = mydata._request()
+
+        mydata = mydata["locations"]
+
         ranking_criteria = ['confirmed', 'deaths', 'recovered']
         if rank_by is not None:
             if rank_by not in ranking_criteria:
                 raise ValueError("Invalid ranking criteria. Expected one of: %s" % ranking_criteria)
 
-            ranked = sorted(data, key=lambda i: i['latest'][rank_by], reverse=True)
-            data = ranked
+            ranked = sorted(mydata, key=lambda i: i['latest'][rank_by], reverse=True)
+            mydata = ranked
 
-        return data
+        return mydata
 
     def getLocationByCountryCode(self, country_code, timelines=False) -> List[Dict]:
         """
@@ -129,30 +132,41 @@ class COVID19(object):
         :param timelines: Whether timeline information should be returned as well.
         :return: A list of areas that correspond to the country_code. If the country_code is invalid, it returns an empty list.
         """
-        data = None
+        mydata = None
+        endpoint = "/v2/locations"
         if timelines:
-            data = self._request("/v2/locations", {"country_code": country_code, "timelines": str(timelines).lower()})
+            mydata = _request(self.url, self.data_source, endpoint, params={"timelines": str(timelines).lower()})
+            mydata = mydata._request()
         else:
-            data = self._request("/v2/locations", {"country_code": country_code})
-        return data["locations"]
-    
+            mydata = _request(self.url, self.data_source, endpoint, params=None)
+            mydata = mydata._request()
+        return mydata["locations"]
+
     def getLocationByCountry(self, country, timelines=False) -> List[Dict]:
         """
         :param country: String denoting name of the country
         :param timelines: Whether timeline information should be returned as well.
         :return: A list of areas that correspond to the country name. If the country is invalid, it returns an empty list.
         """
-        data = None
+        mydata = None
+        endpoint = "/v2/locations"
         if timelines:
-            data = self._request("/v2/locations", {"country": country, "timelines": str(timelines).lower()})
+            mydata = _request(self.url, self.data_source, endpoint, params={"timelines": str(timelines).lower()})
+            mydata = mydata._request()
         else:
-            data = self._request("/v2/locations", {"country": country})
-        return data["locations"]
+            mydata = _request(self.url, self.data_source, endpoint, params=None)
+            mydata = mydata._request()
+        return mydata["locations"]
+
 
     def getLocationById(self, country_id: int):
         """
         :param country_id: Country Id, an int
         :return: A dictionary with case information for the specified location.
         """
-        data = self._request("/v2/locations/" + str(country_id))
-        return data["location"]
+        mydata = None
+        endpoint = "/v2/locations/" +  str(country_id)
+        mydata = _request(self.url, self.data_source, endpoint, params=None)
+        mydata = mydata._request()
+        
+        return mydata["locations"]
