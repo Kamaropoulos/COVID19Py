@@ -2,7 +2,40 @@ from typing import Dict, List
 import requests
 import json
 
-class COVID19(object):
+class Target(object):
+    # Define interface client (Adapter) will use
+    def __init__(self):
+        self.__adaptee = Adaptee()
+    
+    @abstractmethod
+    def getAll(self):
+        pass
+
+    @abstractmethod
+    def getLatestChanges(self):
+        pass
+
+    @abstractmethod
+    def getLatest(self):
+        pass
+
+    @abstractmethod
+    def getLocations(self):
+        pass 
+
+    @abstractmethod
+    def getLocationByCountryCode(self):
+        pass
+
+    @abstractmethod
+    def getLocationByCountry(self):
+        pass
+
+    @abstractmethod
+    def getLocationById(self):
+        pass
+
+class COVID19(Target):
     default_url = "https://covid-tracker-us.herokuapp.com"
     url = ""
     data_source = ""
@@ -13,19 +46,7 @@ class COVID19(object):
     mirrors_source = "https://raw.github.com/Kamaropoulos/COVID19Py/master/mirrors.json"
     mirrors = None
 
-    __singleton_instance = None
-
-    @staticmethod
-    def getInstance():
-        if COVID19.__singleton_instance == None:
-            COVID19()
-        return COVID19.__singleton_instance
-
     def __init__(self, url="https://covid-tracker-us.herokuapp.com", data_source='jhu'):
-        if COVID19.__singleton_instance != None:
-            raise Exception("Should not create a new instance; using singleton pattern")
-        else:
-            COVID19.__singleton_instance = self
         # Skip mirror checking if custom url was passed
         if url == self.default_url:
             # Load mirrors
@@ -168,3 +189,6 @@ class COVID19(object):
         """
         data = self._request("/v2/locations/" + str(country_id))
         return data["location"]
+
+class Adaptee:
+    # Currently empty because there is not an object that we want to implement yet
