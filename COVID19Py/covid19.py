@@ -2,7 +2,8 @@ from typing import Dict, List
 import requests
 import json
 
-class COVID19(object):
+
+class Covid19Singleton(object):
     default_url = "https://covid-tracker-us.herokuapp.com"
     url = ""
     data_source = ""
@@ -13,7 +14,26 @@ class COVID19(object):
     mirrors_source = "https://raw.github.com/Kamaropoulos/COVID19Py/master/mirrors.json"
     mirrors = None
 
+    # We want to keep track of just one instance of the class, initially None
+    __instance = None
+
+    # Static method to get Covid instance or create one if it does not exist already
+    @staticmethod
+    def getCovidInstance():
+
+        if Covid19Singleton.__instance is None:
+            Covid19Singleton()
+        return Covid19Singleton.__instance
+
     def __init__(self, url="https://covid-tracker-us.herokuapp.com", data_source='jhu'):
+
+        # Start with a private constructor, creates instance if not yet created, else raises exception
+        if Covid19Singleton.__instance is not None:
+            raise Exception("An instance has already been created. Use 'getCovidInstance()' method to retrieve"
+                            " this instance.")
+        else:
+            Covid19Singleton.__instance = self
+
         # Skip mirror checking if custom url was passed
         if url == self.default_url:
             # Load mirrors
@@ -67,7 +87,7 @@ class COVID19(object):
     def _request(self, endpoint, params=None):
         if params is None:
             params = {}
-        response = requests.get(self.url + endpoint, {**params, "source":self.data_source})
+        response = requests.get(self.url + endpoint, {**params, "source": self.data_source})
         response.raise_for_status()
         return response.json()
 
@@ -112,7 +132,7 @@ class COVID19(object):
             data = self._request("/v2/locations")
 
         data = data["locations"]
-        
+
         ranking_criteria = ['confirmed', 'deaths', 'recovered']
         if rank_by is not None:
             if rank_by not in ranking_criteria:
@@ -135,7 +155,7 @@ class COVID19(object):
         else:
             data = self._request("/v2/locations", {"country_code": country_code})
         return data["locations"]
-    
+
     def getLocationByCountry(self, country, timelines=False) -> List[Dict]:
         """
         :param country: String denoting name of the country
