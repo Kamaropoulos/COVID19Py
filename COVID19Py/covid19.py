@@ -1,3 +1,4 @@
+
 from typing import Dict, List
 import requests
 import json
@@ -12,6 +13,12 @@ class COVID19(object):
 
     mirrors_source = "https://raw.github.com/Kamaropoulos/COVID19Py/master/mirrors.json"
     mirrors = None
+
+    def __init__(self):
+        self.allLocations = None
+        self.country = None
+        self.code = None
+        self.id = None
 
     def __init__(self, url="https://covid-tracker-us.herokuapp.com", data_source='jhu'):
         # Skip mirror checking if custom url was passed
@@ -98,6 +105,11 @@ class COVID19(object):
         data = self._request("/v2/latest")
         return data["latest"]
 
+
+class LocationBuilder: 
+    def __intit__(self, location =  COVID19(object)):
+        self.location = location
+
     def getLocations(self, timelines=False, rank_by: str = None) -> List[Dict]:
         """
         Gets all locations affected by COVID-19, as well as latest case data.
@@ -121,7 +133,8 @@ class COVID19(object):
             ranked = sorted(data, key=lambda i: i['latest'][rank_by], reverse=True)
             data = ranked
 
-        return data
+        self.location.allLocations = data["locations"]
+        return self
 
     def getLocationByCountryCode(self, country_code, timelines=False) -> List[Dict]:
         """
@@ -134,7 +147,8 @@ class COVID19(object):
             data = self._request("/v2/locations", {"country_code": country_code, "timelines": str(timelines).lower()})
         else:
             data = self._request("/v2/locations", {"country_code": country_code})
-        return data["locations"]
+        self.location.code = data["locations"]
+        return self
     
     def getLocationByCountry(self, country, timelines=False) -> List[Dict]:
         """
@@ -147,7 +161,9 @@ class COVID19(object):
             data = self._request("/v2/locations", {"country": country, "timelines": str(timelines).lower()})
         else:
             data = self._request("/v2/locations", {"country": country})
-        return data["locations"]
+        
+        self.location.country = data["locations"]
+        return self
 
     def getLocationById(self, country_id: int):
         """
@@ -155,4 +171,10 @@ class COVID19(object):
         :return: A dictionary with case information for the specified location.
         """
         data = self._request("/v2/locations/" + str(country_id))
-        return data["location"]
+        
+        self.location.id = data["locations"]
+        return self
+    
+    def build(self):
+        return self.location
+    
