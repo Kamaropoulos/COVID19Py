@@ -167,7 +167,7 @@ class COVID19(object):
 
         return data
 
-    def getLocationByCountryCode(self, country_code, timelines=False) -> List[Dict]:
+    def getLocationByCountryCode(self, country_code, timelines=False):
         """
         :param country_code: String denoting the ISO 3166-1 alpha-2 code (https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) of the country
         :param timelines: Whether timeline information should be returned as well.
