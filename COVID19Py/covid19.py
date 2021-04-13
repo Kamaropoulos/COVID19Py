@@ -3,7 +3,50 @@ import requests
 import json
 
 
-class Covid19Singleton(object):
+# class to format output for country (name, code, id) data
+class Formatter1:
+    # use for country by name and code methods
+    @staticmethod
+    def format1(self, data):
+        for i in data:
+            print('-------------------------------------------')
+            for key, value in i.items():
+                print(key, ': ', value)
+            print('-------------------------------------------')
+        return ""
+
+    # use for country by id methods
+    @staticmethod
+    def format2(self, data):
+        print('-------------------------------------------')
+        for key, value in data.items():
+            print(key, ': ', value)
+        print('-------------------------------------------')
+        return ""
+
+
+# class to format output for all data
+class Formatter2:
+    @staticmethod
+    def formatAllData(self, data):
+        print("--------------Latest Total Data----------------")
+        # first get the data for latest (value for key latest)
+        data1 = data.get('latest')
+        # reformat to display on each line vertically
+        for key, value in data1.items():
+            print(key, ': ', value)
+        # second, get the data for locations (value for key locations)
+        print("-------------List of All Locations-------------")
+        data2 = data.get('locations')
+        for i in data2:
+            # takes each dictionary item
+            for key, value in i.items():
+                print(key, ': ', value)
+            print('-------------------------------------------')
+        return ""
+
+
+class COVID19(object):
     default_url = "https://covid-tracker-us.herokuapp.com"
     url = ""
     data_source = ""
@@ -14,26 +57,7 @@ class Covid19Singleton(object):
     mirrors_source = "https://raw.github.com/Kamaropoulos/COVID19Py/master/mirrors.json"
     mirrors = None
 
-    # We want to keep track of just one instance of the class, initially None
-    __instance = None
-
-    # Static method to get Covid instance or create one if it does not exist already
-    @staticmethod
-    def getCovidInstance():
-
-        if Covid19Singleton.__instance is None:
-            Covid19Singleton()
-        return Covid19Singleton.__instance
-
     def __init__(self, url="https://covid-tracker-us.herokuapp.com", data_source='jhu'):
-
-        # Start with a private constructor, creates instance if not yet created, else raises exception
-        if Covid19Singleton.__instance is not None:
-            raise Exception("An instance has already been created. Use 'getCovidInstance()' method to retrieve"
-                            " this instance.")
-        else:
-            Covid19Singleton.__instance = self
-
         # Skip mirror checking if custom url was passed
         if url == self.default_url:
             # Load mirrors
@@ -93,7 +117,7 @@ class Covid19Singleton(object):
 
     def getAll(self, timelines=False):
         self._update(timelines)
-        return self.latestData
+        return Formatter2.formatAllData(self, self.latestData)
 
     def getLatestChanges(self):
         changes = None
@@ -154,9 +178,9 @@ class Covid19Singleton(object):
             data = self._request("/v2/locations", {"country_code": country_code, "timelines": str(timelines).lower()})
         else:
             data = self._request("/v2/locations", {"country_code": country_code})
-        return data["locations"]
+        return Formatter1.format1(self, data["locations"])
 
-    def getLocationByCountry(self, country, timelines=False) -> List[Dict]:
+    def getLocationByCountry(self, country, timelines=False):
         """
         :param country: String denoting name of the country
         :param timelines: Whether timeline information should be returned as well.
@@ -167,7 +191,7 @@ class Covid19Singleton(object):
             data = self._request("/v2/locations", {"country": country, "timelines": str(timelines).lower()})
         else:
             data = self._request("/v2/locations", {"country": country})
-        return data["locations"]
+        return Formatter1.format1(self, data["locations"])
 
     def getLocationById(self, country_id: int):
         """
@@ -175,4 +199,4 @@ class Covid19Singleton(object):
         :return: A dictionary with case information for the specified location.
         """
         data = self._request("/v2/locations/" + str(country_id))
-        return data["location"]
+        return Formatter1.format2(self, data["location"])
