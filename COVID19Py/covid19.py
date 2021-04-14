@@ -78,7 +78,39 @@ class COVID19(object):
 
         return data
 
-    def getLocationData(self, location, timelines=False):
+    # def getLocationData(self, location, timelines=False):
+    #     """
+    #     :param location: Location containing any combination of strings denoting...
+    #         - the name of the country
+    #         - the ISO 3166-1 alpha-2 code (https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) of the country
+    #         - the country id, an int
+    #     :param timelines: Whether timeline information should be returned as well.
+    #     :return: Either a list of areas that correspond to the location, or a dictionary with case information for the specified location.
+    #     """
+    #     # retrieve by country name
+    #     if location.country != "":
+    #         data = None
+    #         if timelines:
+    #             data = self._request("/v2/locations", {"country": location.country, "timelines": str(timelines).lower()})
+    #         else:
+    #             data = self._request("/v2/locations", {"country": location.country})
+    #         return data["locations"]
+
+    #     # retrieve by country code
+    #     if location.country_code != "":
+    #         data = None
+    #         if timelines:
+    #             data = self._request("/v2/locations", {"country_code": location.country_code, "timelines": str(timelines).lower()})
+    #         else:
+    #             data = self._request("/v2/locations", {"country_code": location.country_code})
+    #         return data["locations"]
+
+    #     # retrieve by country id
+    #     if location.country_id != "":
+    #         data = self._request("/v2/locations/" + str(location.country_id))
+    #         return data["location"]
+
+    def getLocationData(self, locationGroup, timelines=False):
         """
         :param location: Location containing any combination of strings denoting...
             - the name of the country
@@ -87,28 +119,34 @@ class COVID19(object):
         :param timelines: Whether timeline information should be returned as well.
         :return: Either a list of areas that correspond to the location, or a dictionary with case information for the specified location.
         """
-        # retrieve by country name
-        if location.country != "":
-            data = None
-            if timelines:
-                data = self._request("/v2/locations", {"country": location.country, "timelines": str(timelines).lower()})
-            else:
-                data = self._request("/v2/locations", {"country": location.country})
-            return data["locations"]
 
-        # retrieve by country code
-        if location.country_code != "":
-            data = None
-            if timelines:
-                data = self._request("/v2/locations", {"country_code": location.country_code, "timelines": str(timelines).lower()})
-            else:
-                data = self._request("/v2/locations", {"country_code": location.country_code})
-            return data["locations"]
+        output = []
 
-        # retrieve by country id
-        if location.country_id != "":
-            data = self._request("/v2/locations/" + str(location.country_id))
-            return data["location"]
+        for location in locationGroup.locList:
+            # retrieve by country name
+            if location.country != "":
+                data = None
+                if timelines:
+                    data = self._request("/v2/locations", {"country": location.country, "timelines": str(timelines).lower()})
+                else:
+                    data = self._request("/v2/locations", {"country": location.country})
+                output += data["locations"]
+
+            # retrieve by country code
+            elif location.country_code != "":
+                data = None
+                if timelines:
+                    data = self._request("/v2/locations", {"country_code": location.country_code, "timelines": str(timelines).lower()})
+                else:
+                    data = self._request("/v2/locations", {"country_code": location.country_code})
+                output += data["locations"]
+
+            # retrieve by country id
+            elif location.country_id != "":
+                data = self._request("/v2/locations/" + str(location.country_id))
+                output += data["location"]
+        
+        return output
 
 class Data:
     __instance = None
@@ -194,7 +232,14 @@ class Location(object):
         
         return "{: <25} ({}) \tid:{}".format(self.country, self.country_code, self.country_id)
 
+class LocationGroup(object):
+    locList = []
+
+    def __init__(self, locList=None):
+        if locList is not None:
+            self.locList = locList
+
 
 # Testing
 if __name__ == '__main__':
-    print(COVID19(Data()).getLocationData(Location(country_code="CA")))
+    print(COVID19(Data()).getLocationData(LocationGroup([Location(country_code="US"), Location(country_code="CA")])))
