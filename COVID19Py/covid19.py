@@ -8,49 +8,71 @@ class COVID19(object):
     data_source = ""
     previousData = None
     latestData = None
-    _valid_data_sources = [] 
-    user_lists = {}
-    alternate_sources = {}
-    
+    _valid_data_sources = []
+    __singleInstance = None
+
     mirrors_source = "https://raw.github.com/Kamaropoulos/COVID19Py/master/mirrors.json"
     mirrors = None
 
-    
     def __init__(self, url="https://covid-tracker-us.herokuapp.com", data_source='jhu'):
-        # Skip mirror checking if custom url was passed
-        if url == self.default_url:
-            # Load mirrors
-            response = requests.get(self.mirrors_source)
-            response.raise_for_status()
-            self.mirrors = response.json()
-
-            # Try to get sources as a test
-            for mirror in self.mirrors:
-                # Set URL of mirror
-                self.url = mirror["url"]
-                result = None
-                try:
-                    result = self._getSources()
-                except Exception as e:
-                    # URL did not work, reset it and move on
-                    self.url = ""
-                    continue
-
-                # TODO: Should have a better health-check, this is way too hacky...
-                if "jhu" in result:
-                    # We found a mirror that worked just fine, let's stick with it
-                    break
-
-                # None of the mirrors worked. Raise an error to inform the user.
-                raise RuntimeError("No available API mirror was found.")
-
+        """
+        Modified __init__ to only create a new instance when no existing instance was created.
+        The existing instance can be fond in the _singleInstance class field. This modificaiton
+        allows for the class to follow the singleton pattern.
+        """
+        if COVID19.__singleInstance != None:
+                raise Exception ("You cannot make multiple instances of singleton class COVID19.")
         else:
-            self.url = url
-
-        self._valid_data_sources = self._getSources()
-        if data_source not in self._valid_data_sources:
-            raise ValueError("Invalid data source. Expected one of: %s" % self._valid_data_sources)
-        self.data_source = data_source
+            COVID19.__singleInstance = self
+            # Skip mirror checking if custom url was passed
+            if url == self.default_url:
+                # Load mirrors
+                response = requests.get(self.mirrors_source)
+                response.raise_for_status()
+                self.mirrors = response.json()
+    
+                # Try to get sources as a test
+                for mirror in self.mirrors:
+                    # Set URL of mirror
+                    self.url = mirror["url"]
+                    result = None
+                    try:
+                        result = self._getSources()
+                    except Exception as e:
+                        # URL did not work, reset it and move on
+                        self.url = ""
+                        continue
+    
+                    # TODO: Should have a better health-check, this is way too hacky...
+                    if "jhu" in result:
+                        # We found a mirror that worked just fine, let's stick with it
+                        break
+    
+                    # None of the mirrors worked. Raise an error to inform the user.
+                    raise RuntimeError("No available API mirror was found.")
+    
+            else:
+                self.url = url
+    
+            self._valid_data_sources = self._getSources()
+            if data_source not in self._valid_data_sources:
+                raise ValueError("Invalid data source. Expected one of: %s" % self._valid_data_sources)
+            self.data_source = data_source
+    
+    @staticmethod
+    def getInstance(url="https://covid-tracker-us.herokuapp.com", data_source='jhu'):
+        """
+        return:a new instance of COVID19 if no existing instance is created. Instance is stored in 
+        the class field _singleInstance. If instance already exists then simply return it and do not
+        allow for another to be created.
+        Note** I allowed for getInstance to accept a url and data_source if the user wishes to create
+        the original instance through this method. This allows for object creation like how it was
+        originally intended.
+        """
+        if COVID19.__singleInstance == None:
+            COVID19(url, data_source)
+        
+        return COVID19.__singleInstance 
 
     def _update(self, timelines):
         latest = self.getLatest()
@@ -159,48 +181,3 @@ class COVID19(object):
         """
         data = self._request("/v2/locations/" + str(country_id))
         return data["location"]
-    
-    def getAlternateSource(self, name, url="https://covid-tracker-us.herokuapp.com", data_source='jhu'):
-        """
-        :param name: A unique (within dictionary alternate_sources) identifying name for an alternate instance
-        of COVID19Py that uses a different URL or data source. If the name is not unique then the original instance
-        of this class is retrieved and any URL or data source passed is ignored.
-        :param url: The url of the API you wish COVID19Py to use
-        :param data_source: The data source you wish to retreive information from through COVID19Py
-        :param timelines: Whether timeline information should be returned as well.   
-        :return: An instance of COVID19Py using the url and data_source from passed parameters.
-            If there are any issues with either the URL or data source exceptions are handled
-            as if you are creating a new instance of COVID19Py
-        """
-        alt = None
-        result = None
-        
-        alt = self.alternate_sources.get(name)
-        
-        #Check if an alternate source exists else create a new one
-        if alt is None:
-            self.alternate_sources.update({name: ALT_SOURCES(url, data_source)})
-            alt = self.alternate_sources.get(name)
-            result = alt._accessAlt()
-        else:
-            result = alt._accessAlt()
-                
-        return result
-    
-            
-class ALT_SOURCES(object):
-    
-    url = ""
-    data_source = ""
-    covid19_obj = None
-    
-    #We attempt to create a COVID19Py object with the passed url and data_source before
-    #setting the class values. This is so we can use the default url if the user passed
-    #an invalid url. This is handled in COVID19Py.__init__
-    def __init__(self, url, data_source):
-        self.covid19_obj = COVID19(url, data_source)
-        self.url = self.covid19_obj.url 
-        self.data_source = self.covid19_obj.data_source
-    
-    def _accessAlt(self):
-        return self.covid19_obj
