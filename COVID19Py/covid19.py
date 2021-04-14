@@ -1,6 +1,7 @@
 from typing import Dict, List
 import requests
 import json
+from covidInterfaces import I_SOURCE, ABSTRACT_COUNTRIES
 
 class COVID19(object):
     default_url = "https://covid-tracker-us.herokuapp.com"
@@ -9,71 +10,48 @@ class COVID19(object):
     previousData = None
     latestData = None
     _valid_data_sources = []
-    __singleInstance = None
+    """Stores a dictionary of COUNTRIES which the user can access through a name to request covid19 stats"""
+    _country_lists = {}
 
     mirrors_source = "https://raw.github.com/Kamaropoulos/COVID19Py/master/mirrors.json"
     mirrors = None
 
     def __init__(self, url="https://covid-tracker-us.herokuapp.com", data_source='jhu'):
-        """
-        Modified __init__ to only create a new instance when no existing instance was created.
-        The existing instance can be fond in the _singleInstance class field. This modificaiton
-        allows for the class to follow the singleton pattern.
-        """
-        if COVID19.__singleInstance != None:
-                raise Exception ("You cannot make multiple instances of singleton class COVID19.")
-        else:
-            COVID19.__singleInstance = self
-            # Skip mirror checking if custom url was passed
-            if url == self.default_url:
-                # Load mirrors
-                response = requests.get(self.mirrors_source)
-                response.raise_for_status()
-                self.mirrors = response.json()
-    
-                # Try to get sources as a test
-                for mirror in self.mirrors:
-                    # Set URL of mirror
-                    self.url = mirror["url"]
-                    result = None
-                    try:
-                        result = self._getSources()
-                    except Exception as e:
-                        # URL did not work, reset it and move on
-                        self.url = ""
-                        continue
-    
-                    # TODO: Should have a better health-check, this is way too hacky...
-                    if "jhu" in result:
-                        # We found a mirror that worked just fine, let's stick with it
-                        break
-    
-                    # None of the mirrors worked. Raise an error to inform the user.
-                    raise RuntimeError("No available API mirror was found.")
-    
-            else:
-                self.url = url
-    
-            self._valid_data_sources = self._getSources()
-            if data_source not in self._valid_data_sources:
-                raise ValueError("Invalid data source. Expected one of: %s" % self._valid_data_sources)
-            self.data_source = data_source
-    
-    @staticmethod
-    def getInstance(url="https://covid-tracker-us.herokuapp.com", data_source='jhu'):
-        """
-        return:a new instance of COVID19 if no existing instance is created. Instance is stored in 
-        the class field _singleInstance. If instance already exists then simply return it and do not
-        allow for another to be created.
-        Note** I allowed for getInstance to accept a url and data_source if the user wishes to create
-        the original instance through this method. This allows for object creation like how it was
-        originally intended.
-        """
-        if COVID19.__singleInstance == None:
-            COVID19(url, data_source)
-        
-        return COVID19.__singleInstance 
+        # Skip mirror checking if custom url was passed
+        if url == self.default_url:
+            # Load mirrors
+            response = requests.get(self.mirrors_source)
+            response.raise_for_status()
+            self.mirrors = response.json()
 
+            # Try to get sources as a test
+            for mirror in self.mirrors:
+                # Set URL of mirror
+                self.url = mirror["url"]
+                result = None
+                try:
+                    result = self._getSources()
+                except Exception as e:
+                    # URL did not work, reset it and move on
+                    self.url = ""
+                    continue
+
+                # TODO: Should have a better health-check, this is way too hacky...
+                if "jhu" in result:
+                    # We found a mirror that worked just fine, let's stick with it
+                    break
+
+                # None of the mirrors worked. Raise an error to inform the user.
+                raise RuntimeError("No available API mirror was found.")
+
+        else:
+            self.url = url
+
+        self._valid_data_sources = self._getSources()
+        if data_source not in self._valid_data_sources:
+            raise ValueError("Invalid data source. Expected one of: %s" % self._valid_data_sources)
+        self.data_source = data_source
+    
     def _update(self, timelines):
         latest = self.getLatest()
         locations = self.getLocations(timelines)
@@ -181,3 +159,119 @@ class COVID19(object):
         """
         data = self._request("/v2/locations/" + str(country_id))
         return data["location"]
+
+    def getMultipleCountries(self, name, timelines = False):
+        """
+        :param name: A unique identifier for a COUNTRIES entity.
+        :return: The covid19 information for a COUNTRIES entitiy denoted by name, else an empty list
+        """
+        if self._country_lists.get(name) == None:
+            return []
+        else:
+            return self._country_lists.get(name).getCountries(timelines)
+    
+    def createCountryList(self, name, url = "https://covid-tracker-us.herokuapp.com", data_source = "jhu", countries = [], typeCall = -1):
+        """
+        :param name: A unique identifier for a COUNTRIES entity.
+        :param url and data_source: The backend and data source you want a list of countries to use when
+        getting information.
+        :param countries: a list of countries you wish to get covid19 information on all at once.
+        :param typeCall: This indicates the format countries are stored in. If the code does not match 
+        the format when retreiving data an error will be thrown by the back end. The codes are as follows
+        0 = Countries indicated by code
+        1 = Countries indicated by name
+        2 = Countries indicated by id
+        -1 = no code provided. Will not call back end and will always produce an empty list.
+        :return: An instance of COUNTRIES
+        """
+        if self._country_lists.get(name) == None:
+            self._country_lists[name] = COUNTRIES(ALT_SOURCE(url, data_source), typeCall, countries)
+            return self._country_lists.get(name).getCountries()
+        else:
+            self._country_lists.update({name: COUNTRIES(ALT_SOURCE(url, data_source), typeCall, countries)})
+            return self._country_lists.get(name).getCountries()
+        
+    
+class COUNTRIES(ABSTRACT_COUNTRIES, object):
+    
+    country_list = []
+    source = None
+    typeCall = -1
+    
+    def __init__(self,source: I_SOURCE, typeCall = -1, country_list = []):
+        """
+        We assume if no typeCall is passed then country_list is not specified or in inconcistent state,
+        so we set it to -1 by default. When getCountries is called an empty list will be returned.
+        """
+        self.source = source
+        self.typeCall = typeCall
+        self.country_list = country_list
+        
+    def getCountries(self, timelines = False):
+        """
+        :param timelines: Will return timelines if true, else false
+        :return: the covid19 information on the countries in country_list 
+        """
+        if self.typeCall == 0:
+            return self._getCountriesByCode(timelines)
+        elif self.typeCall == 1:
+            return self._getCountriesByName(timelines)
+        elif self.typeCall == 2:
+            return self._getCountriesById()
+        else:
+            return []
+    
+    def accessList(self):
+        """
+        :return: A list with the first indec storing the type of country list
+        with the remaining countries in country_list appended to it
+        """
+        countries = []
+        countries.append(self.typeCall)
+        countries.append(self.country_list)
+        return countries
+        
+    
+    def _getCountriesByCode(self, timelines = False):
+        """Return a list of countries when given their codes"""
+        countryStats = []
+
+        for code in self.country_list:
+            countryStats.append(self.source.accessAlt().getLocationByCountryCode(code, timelines))
+        
+        return countryStats
+            
+      
+    def _getCountriesByName(self, timelines = False):
+        """Return a list of countries when given their names"""
+        countryStats = []
+
+        for name in self.country_list:
+            countryStats.append(self.source.accessAlt().getLocationByCountry(name, timelines))
+        
+        return countryStats
+    
+    def _getCountriesById(self):
+        """Return a list of countries when given their ids"""
+        countryStats = []
+
+        for i in self.country_list:
+            countryStats.append(self.source.accessAlt().getLocationById(i))
+        
+        return countryStats
+
+
+class ALT_SOURCE(I_SOURCE, object):
+    url = ""
+    data_source = ""
+    covid19_obj = None
+    
+    def __init__(self, url = "https://covid-tracker-us.herokuapp.com", data_source = "jhu"):
+        """Create a new covid19 instance with the desired data source"""
+        self.covid19_obj = COVID19(url, data_source)
+        self.url = self.covid19_obj.url 
+        self.data_source = self.covid19_obj.data_source
+    
+    def accessAlt(self):
+        """Return alternate source"""
+        return self.covid19_obj
