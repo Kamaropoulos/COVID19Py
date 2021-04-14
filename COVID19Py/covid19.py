@@ -1,8 +1,11 @@
 from typing import Dict, List
 import requests
 import json
+from .singleton import Singleton
 
-class COVID19(object):
+#Singleton design pattern is applied to this class as a metaclass as it can define how COVID19 class will behnave
+class COVID19(object, metaclass=Singleton):
+
     default_url = "https://covid-tracker-us.herokuapp.com"
     url = ""
     data_source = ""
@@ -13,11 +16,11 @@ class COVID19(object):
     mirrors_source = "https://raw.github.com/Kamaropoulos/COVID19Py/master/mirrors.json"
     mirrors = None
 
-    def __init__(self, url="https://covid-tracker-us.herokuapp.com", data_source='jhu'):
+    def __init__(self, url=default_url, data_source='jhu'):
         # Skip mirror checking if custom url was passed
         if url == self.default_url:
             # Load mirrors
-            response = requests.get(self.mirrors_source)
+            response = requests.get(self.mirrors_source) 
             response.raise_for_status()
             self.mirrors = response.json()
 
