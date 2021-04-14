@@ -3,6 +3,8 @@ import requests
 import json
 
 class COVID19(object):
+    __instance = None
+
     default_url = "https://covid-tracker-us.herokuapp.com"
     url = ""
     data_source = ""
@@ -13,7 +15,22 @@ class COVID19(object):
     mirrors_source = "https://raw.github.com/Kamaropoulos/COVID19Py/master/mirrors.json"
     mirrors = None
 
-    def __init__(self, url="https://covid-tracker-us.herokuapp.com", data_source='jhu'):
+    @classmethod
+    def getInstance(cls):
+        if cls.__instance == None:
+            cls.__instance = cls.__new__(cls)
+            cls.__instance.init()
+        return cls.__instance
+
+    def __init__(self):
+        raise Exception("Cannot call constructor of singleton class. Call getInstance to get instance")
+
+    def init(self, url="https://covid-tracker-us.herokuapp.com", data_source='jhu'):
+        # if COVID19.__instance != None:
+        #     raise Exception("Cannot create more than one instance of singleton class. Call getInstance to get instance")
+        # else:
+        #     COVID19.__instance = self
+
         # Skip mirror checking if custom url was passed
         if url == self.default_url:
             # Load mirrors
