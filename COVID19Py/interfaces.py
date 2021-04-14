@@ -1,22 +1,18 @@
-from abc import ABCMeta, abstractmethod, classmethod
+from abc import ABCMeta, abstractmethod
 
 
 class ICOVID19(metaclass=ABCMeta):
-    @staticmethod
-    @abstractmethod
-    def create_object():
-        "Abstract Interface method"
+    # @staticmethod
+    # @abstractmethod
+    # def create_object():
+    #     "Abstract Interface method"
 
     @classmethod
     @abstractmethod
     def _update(self,timelines):
         "Update"
 
-    @classmethod
-    @abstractmethod
-    def _getSources(self):
-        "_getSources"
-
+    
     @classmethod
     @abstractmethod
     def _request(self,endpoint,params=None):
@@ -58,5 +54,3 @@ class ICOVID19(metaclass=ABCMeta):
     def getLocationById(self,country_id):
         "getLocationById"
 
-class ConcreteAPIDefault(ICOVID19):
-    
