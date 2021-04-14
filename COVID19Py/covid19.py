@@ -2,13 +2,21 @@ from typing import Dict, List
 import requests
 import json
 
-class COVID19(object):
+
+class SingletonOfCOVID19(object):
     default_url = "https://covid-tracker-us.herokuapp.com"
     url = ""
     data_source = ""
     previousData = None
     latestData = None
     _valid_data_sources = []
+    _instance = None
+
+    def _new_(self):
+        if not self._instance:
+            self._instance = super(SingletonOfCOVID19, self).__new__(self)
+            SingletonOfCOVID19()
+            return SingletonOfCOVID19._instance
 
     mirrors_source = "https://raw.github.com/Kamaropoulos/COVID19Py/master/mirrors.json"
     mirrors = None
@@ -67,7 +75,7 @@ class COVID19(object):
     def _request(self, endpoint, params=None):
         if params is None:
             params = {}
-        response = requests.get(self.url + endpoint, {**params, "source":self.data_source})
+        response = requests.get(self.url + endpoint, {**params, "source": self.data_source})
         response.raise_for_status()
         return response.json()
 
@@ -112,7 +120,7 @@ class COVID19(object):
             data = self._request("/v2/locations")
 
         data = data["locations"]
-        
+
         ranking_criteria = ['confirmed', 'deaths', 'recovered']
         if rank_by is not None:
             if rank_by not in ranking_criteria:
@@ -135,7 +143,7 @@ class COVID19(object):
         else:
             data = self._request("/v2/locations", {"country_code": country_code})
         return data["locations"]
-    
+
     def getLocationByCountry(self, country, timelines=False) -> List[Dict]:
         """
         :param country: String denoting name of the country
