@@ -110,8 +110,9 @@ class COVID19(object):
             data = self._request("/v2/locations/" + str(location.country_id))
             return data["location"]
 
+class Data:
+    __instance = None
 
-class Data(object):
     default_url = "https://covid-tracker-us.herokuapp.com"
     url = ""
     data_source = ""
@@ -123,47 +124,56 @@ class Data(object):
     mirrors = None
 
     def __init__(self, url="https://covid-tracker-us.herokuapp.com", data_source="jhu"):
-        # Skip mirror checking if custom url was passed
-        if url == self.default_url:
-            # Load mirrors
-            response = requests.get(self.mirrors_source)
-            response.raise_for_status()
-            self.mirrors = response.json()
-
-            # Try to get sources as a test
-            for mirror in self.mirrors:
-                # Set URL of mirror
-                self.url = mirror["url"]
-                result = None
-                try:
-                    result = self._getSources()
-                except Exception as e:
-                    # URL did not work, reset it and move on
-                    self.url = ""
-                    continue
-
-                # TODO: Should have a better health-check, this is way too hacky...
-                if "jhu" in result:
-                    # We found a mirror that worked just fine, let's stick with it
-                    break
-
-                # None of the mirrors worked. Raise an error to inform the user.
-                raise RuntimeError("No available API mirror was found.")
-
+        if Data.__instance != None:
+            raise Exception("Singleton!")
         else:
-            self.url = url
+            Data.__instance = self
 
-        self._valid_data_sources = self._getSources()
-        if data_source not in self._valid_data_sources:
-            raise ValueError("Invalid data source. Expected one of: %s" % self._valid_data_sources)
-        self.data_source = data_source
+            # Skip mirror checking if custom url was passed
+            if url == Data.__instance.default_url:
+                # Load mirrors
+                response = requests.get(Data.__instance.mirrors_source)
+                response.raise_for_status()
+                Data.__instance.mirrors = response.json()
 
-    def _getSources(self):
-        response = requests.get(self.url + "/v2/sources")
+                # Try to get sources as a test
+                for mirror in Data.__instance.mirrors:
+                    # Set URL of mirror
+                    Data.__instance.url = mirror["url"]
+                    result = None
+                    try:
+                        result = Data._getSources()
+                    except Exception as e:
+                        # URL did not work, reset it and move on
+                        Data.__instance.url = ""
+                        continue
+
+                    # TODO: Should have a better health-check, this is way too hacky...
+                    if "jhu" in result:
+                        # We found a mirror that worked just fine, let's stick with it
+                        break
+
+                    # None of the mirrors worked. Raise an error to inform the user.
+                    raise RuntimeError("No available API mirror was found.")
+
+            else:
+                Data.__instance.url = url
+
+            Data.__instance._valid_data_sources = Data._getSources()
+            if data_source not in Data.__instance._valid_data_sources:
+                raise ValueError("Invalid data source. Expected one of: %s" % Data.__instance._valid_data_sources)
+            Data.__instance.data_source = data_source
+
+    def Instance():
+        if Data.__instance == None:
+            Data()
+        return Data.__instance
+
+    @staticmethod
+    def _getSources():
+        response = requests.get(Data.__instance.url + "/v2/sources")
         response.raise_for_status()
         return response.json()["sources"]
-
-
 
 class Location(object):
     country = ""
@@ -186,9 +196,5 @@ class Location(object):
 
 
 # Testing
-# def main():
-#     tracker = COVID19(Data())
-#     print(tracker.getLocationData(Location(country_code="CA")))
-
-# if __name__ == '__main__':
-#     main()
+if __name__ == '__main__':
+    print(COVID19(Data()).getLocationData(Location(country_code="CA")))
