@@ -65,7 +65,7 @@ class GetSpecificLocation(GetLocationInformation):
         return data["locations"]
 
 
-class GetOverallInformationByCountry(GetOverallInformation):
+class GetOverallInformationByCountry(GetLocationInformation):
     def getLocations(self, timelines=False, rank_by: str = None) -> List[Dict]:
         """
         Gets all locations affected by COVID-19, as well as latest case data.
