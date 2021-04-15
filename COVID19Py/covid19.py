@@ -2,6 +2,172 @@ from typing import Dict, List
 import requests
 import json
 
+
+# Applied the Bridge Structural Design Pattern to covid19.py. 
+# For this I needed to separate a class' interface from it's implementation, which is precisely what I've done.
+
+
+# Implementation for methods that return general COVID-19 case information
+class GeneralCaseInformation:
+
+    # Gets all data at once
+    @abstractmethod
+    def getAll(self, timelines=False):
+        pass
+
+    # Gets the latest changes in COVID-19 case data since last request
+    @abstractmethod
+    def getLatestChanges(self):
+        pass
+
+    # Gets the latest COVID-19 case data
+    @abstractmethod
+    def getLatest(self) -> List[Dict[str, int]]:
+        pass
+
+
+
+# Implementation for methods that return location-specific COVID-19 case information
+class SpecificLocationBasedInformation:
+
+    # Get COVID-19 case data relating to all locations with COVID-19
+    @abstractmethod
+    def getLocations(self, timelines=False, rank_by: str = None) -> List[Dict]:
+        pass
+
+
+
+# Implementation for methods that return country-based COVID-19 case information
+class CountryBasedInformation:
+
+    # Get COVID-19 case data by method of country code
+    @abstractmethod
+    def getLocationByCountryCode(self, country_code, timelines=False) -> List[Dict]:
+        pass
+    
+    # Get COVID-19 case data by method of country name
+    @abstractmethod
+    def getLocationByCountry(self, country, timelines=False) -> List[Dict]:
+        pass
+
+    # Get COVID-19 case data by method of country id
+    @abstractmethod
+    def getLocationById(self, country_id: int):
+        pass
+
+
+# Concrete implementation for methods that return general COVID-19 case information
+class GetGeneralInformation(GeneralCaseInformation):
+
+    # Gets all data at once
+    def getAll(self, timelines=False):
+        self._update(timelines)
+        return self.latestData
+
+
+    # Gets the latest changes in COVID-19 case data since last request
+    def getLatestChanges(self):
+        changes = None
+        if self.previousData:
+            changes = {
+                "confirmed": self.latestData["latest"]["confirmed"] - self.previousData["latest"]["confirmed"],
+                "deaths": self.latestData["latest"]["deaths"] - self.previousData["latest"]["deaths"],
+                "recovered": self.latestData["latest"]["recovered"] - self.previousData["latest"]["recovered"],
+            }
+        else:
+            changes = {
+                "confirmed": 0,
+                "deaths": 0,
+                "recovered": 0,
+            }
+        return changes
+
+
+    # Gets the latest COVID-19 case data
+    def getLatest(self) -> List[Dict[str, int]]:
+        """
+        :return: The latest amount of total confirmed cases, deaths, and recoveries.
+        """
+        data = self._request("/v2/latest")
+        return data["latest"]
+
+
+# Concrete implementation for methods that return location-specific COVID-19 case information
+class GetInformationByLocation(SpecificLocationBasedInformation):
+
+    # Get COVID-19 case data relating to all locations with COVID-19
+    def getLocations(self, timelines=False, rank_by: str = None) -> List[Dict]:
+        """
+        Gets all locations affected by COVID-19, as well as latest case data.
+        :param timelines: Whether timeline information should be returned as well.
+        :param rank_by: Category to rank results by. ex: confirmed
+        :return: List of dictionaries representing all affected locations.
+        """
+        data = None
+        if timelines:
+            data = self._request("/v2/locations", {"timelines": str(timelines).lower()})
+        else:
+            data = self._request("/v2/locations")
+
+        data = data["locations"]
+        
+        ranking_criteria = ['confirmed', 'deaths', 'recovered']
+        if rank_by is not None:
+            if rank_by not in ranking_criteria:
+                raise ValueError("Invalid ranking criteria. Expected one of: %s" % ranking_criteria)
+
+            ranked = sorted(data, key=lambda i: i['latest'][rank_by], reverse=True)
+            data = ranked
+
+        return data
+
+
+
+# Concrete implementation for methods that return country-based COVID-19 case information
+class GetInformationByCountry(CountryBasedInformation):
+
+    # Get COVID-19 case data by method of country code
+    def getLocationByCountryCode(self, country_code, timelines=False) -> List[Dict]:
+        """
+        :param country_code: String denoting the ISO 3166-1 alpha-2 code (https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) of the country
+        :param timelines: Whether timeline information should be returned as well.
+        :return: A list of areas that correspond to the country_code. If the country_code is invalid, it returns an empty list.
+        """
+        data = None
+        if timelines:
+            data = self._request("/v2/locations", {"country_code": country_code, "timelines": str(timelines).lower()})
+        else:
+            data = self._request("/v2/locations", {"country_code": country_code})
+        return data["locations"]
+    
+
+    # Get COVID-19 case data by method of country name
+    def getLocationByCountry(self, country, timelines=False) -> List[Dict]:
+        """
+        :param country: String denoting name of the country
+        :param timelines: Whether timeline information should be returned as well.
+        :return: A list of areas that correspond to the country name. If the country is invalid, it returns an empty list.
+        """
+        data = None
+        if timelines:
+            data = self._request("/v2/locations", {"country": country, "timelines": str(timelines).lower()})
+        else:
+            data = self._request("/v2/locations", {"country": country})
+        return data["locations"]
+
+
+    # Get COVID-19 case data by method of country id
+    def getLocationById(self, country_id: int):
+        """
+        :param country_id: Country Id, an int
+        :return: A dictionary with case information for the specified location.
+        """
+        data = self._request("/v2/locations/" + str(country_id))
+        return data["location"]
+
+
+
+# Original COVID19 class
 class COVID19(object):
     default_url = "https://covid-tracker-us.herokuapp.com"
     url = ""
@@ -76,103 +242,3 @@ class COVID19(object):
         response = requests.get(self.url + endpoint, {**params, "source": self.data_source})
         response.raise_for_status()
         return response.json()
-
-
-    # Gets all data at once
-    def getAll(self, timelines=False):
-        self._update(timelines)
-        return self.latestData
-
-
-    # Gets the latest changes in COVID-19 case data since last request
-    def getLatestChanges(self):
-        changes = None
-        if self.previousData:
-            changes = {
-                "confirmed": self.latestData["latest"]["confirmed"] - self.previousData["latest"]["confirmed"],
-                "deaths": self.latestData["latest"]["deaths"] - self.previousData["latest"]["deaths"],
-                "recovered": self.latestData["latest"]["recovered"] - self.previousData["latest"]["recovered"],
-            }
-        else:
-            changes = {
-                "confirmed": 0,
-                "deaths": 0,
-                "recovered": 0,
-            }
-        return changes
-
-
-    # Gets the latest COVID-19 case data
-    def getLatest(self) -> List[Dict[str, int]]:
-        """
-        :return: The latest amount of total confirmed cases, deaths, and recoveries.
-        """
-        data = self._request("/v2/latest")
-        return data["latest"]
-
-
-    # Get COVID-19 case data relating to all locations with COVID-19
-    def getLocations(self, timelines=False, rank_by: str = None) -> List[Dict]:
-        """
-        Gets all locations affected by COVID-19, as well as latest case data.
-        :param timelines: Whether timeline information should be returned as well.
-        :param rank_by: Category to rank results by. ex: confirmed
-        :return: List of dictionaries representing all affected locations.
-        """
-        data = None
-        if timelines:
-            data = self._request("/v2/locations", {"timelines": str(timelines).lower()})
-        else:
-            data = self._request("/v2/locations")
-
-        data = data["locations"]
-        
-        ranking_criteria = ['confirmed', 'deaths', 'recovered']
-        if rank_by is not None:
-            if rank_by not in ranking_criteria:
-                raise ValueError("Invalid ranking criteria. Expected one of: %s" % ranking_criteria)
-
-            ranked = sorted(data, key=lambda i: i['latest'][rank_by], reverse=True)
-            data = ranked
-
-        return data
-
-
-    # Get COVID-19 case data by method of country code
-    def getLocationByCountryCode(self, country_code, timelines=False) -> List[Dict]:
-        """
-        :param country_code: String denoting the ISO 3166-1 alpha-2 code (https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) of the country
-        :param timelines: Whether timeline information should be returned as well.
-        :return: A list of areas that correspond to the country_code. If the country_code is invalid, it returns an empty list.
-        """
-        data = None
-        if timelines:
-            data = self._request("/v2/locations", {"country_code": country_code, "timelines": str(timelines).lower()})
-        else:
-            data = self._request("/v2/locations", {"country_code": country_code})
-        return data["locations"]
-    
-
-    # Get COVID-19 case data by method of country name
-    def getLocationByCountry(self, country, timelines=False) -> List[Dict]:
-        """
-        :param country: String denoting name of the country
-        :param timelines: Whether timeline information should be returned as well.
-        :return: A list of areas that correspond to the country name. If the country is invalid, it returns an empty list.
-        """
-        data = None
-        if timelines:
-            data = self._request("/v2/locations", {"country": country, "timelines": str(timelines).lower()})
-        else:
-            data = self._request("/v2/locations", {"country": country})
-        return data["locations"]
-
-
-    # Get COVID-19 case data by method of country id
-    def getLocationById(self, country_id: int):
-        """
-        :param country_id: Country Id, an int
-        :return: A dictionary with case information for the specified location.
-        """
-        data = self._request("/v2/locations/" + str(country_id))
-        return data["location"]
