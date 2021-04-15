@@ -5,7 +5,6 @@ from enum import Enum
 class Source(Enum):
     Default = 1
     Mirror = 2
-    Mirror2 = 3
 
 class COVID19:
 
