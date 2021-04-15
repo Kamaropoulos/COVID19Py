@@ -15,7 +15,7 @@ class Implementation(ABC):
         pass
     
 class COVID19Implementation(Implementation):
-    
+
     def __init__(self,url,data_source="jhu"):
         self.url = url
         self.data_source = data_source
@@ -24,6 +24,6 @@ class COVID19Implementation(Implementation):
     def getEndLatest(self):
         return "/v2/latest"
 
-     @staticmethod
+    @staticmethod
     def getEndLocations(self):
         return "/v2/locations"
