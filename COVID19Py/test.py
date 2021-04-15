@@ -1,4 +1,5 @@
 from abstract import COVIDAPI
-from implementation import COVID19Implementation
+from implementation import ImplementationDefault
 
 
+print(COVIDAPI(ImplementationDefault()).getLatest())
