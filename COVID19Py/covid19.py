@@ -85,6 +85,14 @@ class COVID19(object):
         response.raise_for_status()
         return response.json()
 
+    #setter for data source
+    def setDataSource(self, data_source):
+        self.data_source = data_source
+
+    #setter for url source
+    def setUrl(self, url):
+        self.url = url
+
     def getAll(self, timelines=False):
         self._update(timelines)
         return self.latestData
