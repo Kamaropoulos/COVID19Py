@@ -14,10 +14,37 @@ class Implementation(ABC):
     def getEndLocations(self):
         pass
     
-class COVID19Implementation(Implementation):
+class ImplementationDefault(Implementation):
+    url = "https://covid-tracker-us.herokuapp.com"
+    def __init__(data_source="jhu"):
+        self.data_source = data_source
 
-    def __init__(self,url,data_source="jhu"):
-        self.url = url
+    @staticmethod
+    def getEndLatest(self):
+        return "/v2/latest"
+
+    @staticmethod
+    def getEndLocations(self):
+        return "/v2/locations"
+
+
+class ImplementationMirror(Implementation):
+    url = "https://cvtapi.nl"
+    def __init__(data_source="jhu"):
+        self.data_source = data_source
+
+    @staticmethod
+    def getEndLatest(self):
+        return "/v2/latest"
+
+    @staticmethod
+    def getEndLocations(self):
+        return "/v2/locations"
+
+
+class ImplementationMirror1(Implementation):
+    url = "http://covid19-api.kamaropoulos.com"
+    def __init__(data_source="jhu"):
         self.data_source = data_source
 
     @staticmethod
