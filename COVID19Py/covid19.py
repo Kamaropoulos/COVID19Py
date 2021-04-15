@@ -2,6 +2,15 @@ from typing import Dict, List
 import requests
 import json
 
+def Singleton(COVID19):
+    instances = {}
+    def getInstance(*args, **kwargs):
+        if COVID19 not in instances:
+            instances[COVID19] = COVID19(*args, **kwargs)
+        return instances[COVID19]
+    return getInstance
+
+@Singleton
 class COVID19(object):
     default_url = "https://covid-tracker-us.herokuapp.com"
     url = ""
@@ -70,6 +79,54 @@ class COVID19(object):
         response = requests.get(self.url + endpoint, {**params, "source":self.data_source})
         response.raise_for_status()
         return response.json()
+
+    def updateDataSource(self, new_source):
+        """
+        Updates the data source to retrieve data from.
+        :param new_source: the new data source to retrieve data from
+        """
+        if new_source == self.data_source:
+            print("That is already the data source.")
+        elif new_source not in self._valid_data_sources:
+            print("Invalid data source. Keeping previous data source. Expected one of: %s" % self._valid_data_sources)
+        else:
+            self.data_source = new_source
+
+    def updateURL(self, new_url):
+        """
+        Updates the url of the backend to retrieve data from.
+        :param new_url: the new url to retrieve data from
+        """
+        if new_url == self.url:
+            print("That is already the URL.")
+        elif new_url == self.default_url:
+            # Load mirrors
+            response = requests.get(self.mirrors_source)
+            response.raise_for_status()
+            self.mirrors = response.json()
+
+            # Try to get sources as a test
+            for mirror in self.mirrors:
+                # Set URL of mirror
+                self.url = mirror["url"]
+                result = None
+                try:
+                    result = self._getSources()
+                except Exception as e:
+                    # URL did not work, reset it and move on
+                    self.url = ""
+                    continue
+
+                # TODO: Should have a better health-check, this is way too hacky...
+                if "jhu" in result:
+                    # We found a mirror that worked just fine, let's stick with it
+                    break
+
+                # None of the mirrors worked. Raise an error to inform the user.
+                raise RuntimeError("No available API mirror was found.")
+
+        else:
+            self.url = new_url
 
     def getAll(self, timelines=False):
         self._update(timelines)
