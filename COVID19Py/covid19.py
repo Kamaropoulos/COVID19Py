@@ -1,8 +1,10 @@
+from .builder_abstract import Get_covid_data
 from typing import Dict, List
 import requests
 import json
 
-class COVID19(object):
+#client works with the Abstraction object and passes implementaiton objects 
+class COVID19(Get_covid_data):
     default_url = "https://covid-tracker-us.herokuapp.com"
     url = ""
     data_source = ""
