@@ -77,6 +77,8 @@ class COVID19(object):
 
 
 class Source(object):
+    __instance = None
+
     default_url = "https://covid-tracker-us.herokuapp.com"
     url = ""
     data_source = ""
@@ -87,24 +89,28 @@ class Source(object):
     mirrors_source = "https://raw.github.com/Kamaropoulos/COVID19Py/master/mirrors.json"
     mirrors = None
 
-    def __init__(self, url="https://covid-tracker-us.herokuapp.com", data_source='jhu'):
+    def __init__(cls, url="https://covid-tracker-us.herokuapp.com", data_source='jhu'):
+        # Singleton check for existing instance
+        if cls.__instance is None:
+            cls.__instance = object.__new__(cls)
+
         # Skip mirror checking if custom url was passed
-        if url == self.default_url:
+        if url == cls.default_url:
             # Load mirrors
-            response = requests.get(self.mirrors_source)
+            response = requests.get(cls.mirrors_source)
             response.raise_for_status()
-            self.mirrors = response.json()
+            cls.mirrors = response.json()
 
             # Try to get sources as a test
-            for mirror in self.mirrors:
+            for mirror in cls.mirrors:
                 # Set URL of mirror
-                self.url = mirror["url"]
+                cls.url = mirror["url"]
                 result = None
                 try:
-                    result = self._getSources()
+                    result = cls._getSources()
                 except Exception as e:
                     # URL did not work, reset it and move on
-                    self.url = ""
+                    cls.url = ""
                     continue
 
                 # TODO: Should have a better health-check, this is way too hacky...
@@ -116,45 +122,45 @@ class Source(object):
                 raise RuntimeError("No available API mirror was found.")
 
         else:
-            self.url = url
+            cls.url = url
 
-        self._valid_data_sources = self._getSources()
-        if data_source not in self._valid_data_sources:
+        cls._valid_data_sources = cls._getSources()
+        if data_source not in cls._valid_data_sources:
             raise ValueError(
-                "Invalid data source. Expected one of: %s" % self._valid_data_sources)
-        self.data_source = data_source
+                "Invalid data source. Expected one of: %s" % cls._valid_data_sources)
+        cls.data_source = data_source
 
-    def _update(self, timelines):
-        latest = self.getLatest()
-        locations = self.getLocations(timelines)
-        if self.latestData:
-            self.previousData = self.latestData
-        self.latestData = {
+    def _update(cls, timelines):
+        latest = cls.getLatest()
+        locations = cls.getLocations(timelines)
+        if cls.latestData:
+            cls.previousData = cls.latestData
+        cls.latestData = {
             "latest": latest,
             "locations": locations
         }
 
-    def _getSources(self):
-        response = requests.get(self.url + "/v2/sources")
+    def _getSources(cls):
+        response = requests.get(cls.url + "/v2/sources")
         response.raise_for_status()
         return response.json()["sources"]
 
-    def _request(self, endpoint, params=None):
+    def _request(cls, endpoint, params=None):
         if params is None:
             params = {}
-        response = requests.get(self.url + endpoint,
-                                {**params, "source": self.data_source})
+        response = requests.get(cls.url + endpoint,
+                                {**params, "source": cls.data_source})
         response.raise_for_status()
         return response.json()
 
-    def getLatest(self) -> List[Dict[str, int]]:
+    def getLatest(cls) -> List[Dict[str, int]]:
         """
         :return: The latest amount of total confirmed cases, deaths, and recoveries.
         """
-        data = self._request("/v2/latest")
+        data = cls._request("/v2/latest")
         return data["latest"]
 
-    def getLocations(self, timelines=False, rank_by: str = None) -> List[Dict]:
+    def getLocations(cls, timelines=False, rank_by: str = None) -> List[Dict]:
         """
         Gets all locations affected by COVID-19, as well as latest case data.
         :param timelines: Whether timeline information should be returned as well.
@@ -163,10 +169,10 @@ class Source(object):
         """
         data = None
         if timelines:
-            data = self._request(
+            data = cls._request(
                 "/v2/locations", {"timelines": str(timelines).lower()})
         else:
-            data = self._request("/v2/locations")
+            data = cls._request("/v2/locations")
 
         data = data["locations"]
 
