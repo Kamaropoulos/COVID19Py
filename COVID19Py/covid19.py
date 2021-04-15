@@ -9,45 +9,57 @@ class COVID19(object):
     previousData = None
     latestData = None
     _valid_data_sources = []
+    _instance = None
 
     mirrors_source = "https://raw.github.com/Kamaropoulos/COVID19Py/master/mirrors.json"
     mirrors = None
 
     def __init__(self, url="https://covid-tracker-us.herokuapp.com", data_source='jhu'):
-        # Skip mirror checking if custom url was passed
-        if url == self.default_url:
-            # Load mirrors
-            response = requests.get(self.mirrors_source)
-            response.raise_for_status()
-            self.mirrors = response.json()
-
-            # Try to get sources as a test
-            for mirror in self.mirrors:
-                # Set URL of mirror
-                self.url = mirror["url"]
-                result = None
-                try:
-                    result = self._getSources()
-                except Exception as e:
-                    # URL did not work, reset it and move on
-                    self.url = ""
-                    continue
-
-                # TODO: Should have a better health-check, this is way too hacky...
-                if "jhu" in result:
-                    # We found a mirror that worked just fine, let's stick with it
-                    break
-
-                # None of the mirrors worked. Raise an error to inform the user.
-                raise RuntimeError("No available API mirror was found.")
-
+        if COVID19._instance is not None:
+            raise Exception("You can not create a second instance of a singleton class")
         else:
-            self.url = url
+            COVID19._instance = self
+            # Skip mirror checking if custom url was passed
+            if url == self.default_url:
+                # Load mirrors
+                response = requests.get(self.mirrors_source)
+                response.raise_for_status()
+                self.mirrors = response.json()
 
-        self._valid_data_sources = self._getSources()
-        if data_source not in self._valid_data_sources:
-            raise ValueError("Invalid data source. Expected one of: %s" % self._valid_data_sources)
-        self.data_source = data_source
+                # Try to get sources as a test
+                for mirror in self.mirrors:
+                    # Set URL of mirror
+                    self.url = mirror["url"]
+                    result = None
+                    try:
+                        result = self._getSources()
+                    except Exception as e:
+                        # URL did not work, reset it and move on
+                        self.url = ""
+                        continue
+
+                    # TODO: Should have a better health-check, this is way too hacky...
+                    if "jhu" in result:
+                        # We found a mirror that worked just fine, let's stick with it
+                        break
+
+                    # None of the mirrors worked. Raise an error to inform the user.
+                    raise RuntimeError("No available API mirror was found.")
+
+            else:
+                self.url = url
+
+            self._valid_data_sources = self._getSources()
+            if data_source not in self._valid_data_sources:
+                raise ValueError("Invalid data source. Expected one of: %s" % self._valid_data_sources)
+            self.data_source = data_source
+
+    @staticmethod
+    def getInstance(url="https://covid-tracker-us.herokuapp.com", data_source = 'jhu'):
+        # Get access to singleton through this access method
+        if COVID19._instance is None:
+            COVID19(url, data_source)
+        return COVID19._instance
 
     def _update(self, timelines):
         latest = self.getLatest()
@@ -67,7 +79,7 @@ class COVID19(object):
     def _request(self, endpoint, params=None):
         if params is None:
             params = {}
-        response = requests.get(self.url + endpoint, {**params, "source":self.data_source})
+        response = requests.get(self.url + endpoint, {**params, "source": self.data_source})
         response.raise_for_status()
         return response.json()
 
@@ -112,7 +124,7 @@ class COVID19(object):
             data = self._request("/v2/locations")
 
         data = data["locations"]
-        
+
         ranking_criteria = ['confirmed', 'deaths', 'recovered']
         if rank_by is not None:
             if rank_by not in ranking_criteria:
@@ -135,7 +147,7 @@ class COVID19(object):
         else:
             data = self._request("/v2/locations", {"country_code": country_code})
         return data["locations"]
-    
+
     def getLocationByCountry(self, country, timelines=False) -> List[Dict]:
         """
         :param country: String denoting name of the country
