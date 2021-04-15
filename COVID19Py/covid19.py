@@ -1,34 +1,43 @@
 from typing import Dict, List
 import requests
+from abc import ABC, abstractmethod
 import json
 
 
-class GetLocationInformation:
+class GetLocationInformation(ABC):
+
+    @abstractmethod
     def getLocations(self, timelines=False, rank_by: str = None) -> List[Dict]:
         pass
 
+    @abstractmethod
     def getLocationByCountryCode(self, country_code, timelines=False) -> List[Dict]:
         pass
 
+    @abstractmethod
     def getLocationByCountry(self, country, timelines=False) -> List[Dict]:
         pass
 
+    @abstractmethod
     def getLocationById(self, country_id: int):
         pass
 
 
-class GetOverallInformation:
+class GetOverallInformation(ABC):
+    @abstractmethod
     def getAll(self, timelines=False):
         pass
 
+    @abstractmethod
     def getLatestChanges(self):
         pass
 
+    @abstractmethod
     def getLatest(self) -> List[Dict[str, int]]:
         pass
 
 
-class GetSpecificLocation(GetLocationInformation):
+class GetSpecificLocation(GetLocationInformation, object, ABC):
 
     def getLocationByCountryCode(self, country_code, timelines=False) -> List[Dict]:
         """
@@ -65,7 +74,7 @@ class GetSpecificLocation(GetLocationInformation):
         return data["locations"]
 
 
-class GetOverallInformationByCountry(GetLocationInformation):
+class GetOverallInformationByCountry(GetLocationInformation, object, ABC):
     def getLocations(self, timelines=False, rank_by: str = None) -> List[Dict]:
         """
         Gets all locations affected by COVID-19, as well as latest case data.
@@ -92,7 +101,7 @@ class GetOverallInformationByCountry(GetLocationInformation):
         return data
 
 
-class GetAllInformation(GetOverallInformation):
+class GetAllInformation(GetOverallInformation, object, ABC):
     def getAll(self, timelines=False):
         self._update(timelines)
         return self.latestData
@@ -169,8 +178,8 @@ class COVID19(object):
         self.data_source = data_source
 
     def _update(self, timelines):
-        latest = self.getLatest()
-        locations = self.getLocations(timelines)
+        latest = GetAllInformation.getLatest()
+        locations = GetOverallInformationByCountry.getLocations(timelines)
         if self.latestData:
             self.previousData = self.latestData
         self.latestData = {
