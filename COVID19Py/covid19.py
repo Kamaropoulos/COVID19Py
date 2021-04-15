@@ -19,7 +19,7 @@ class COVIDSingleton(object):
     def __init__(self, url="https://covid-tracker-us.herokuapp.com", data_source='jhu'):
         
         if COVIDSingleton.__instance is None:
-                CODIVSingleton.__instance = object.__new__(self)
+                COVIDSingleton.__instance = object.__new__(self)
                      
        # Skip mirror checking if custom url was passed 
         if url == self.default_url:
