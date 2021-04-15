@@ -5,7 +5,7 @@ import json
 
 class AbstractAPI(ABC):
     def __init__(self,implementation):
-        self.implementation = implementation
+        self.implementation = implementation()
         self.previousData = None
         self.latestData = None
     @abstractmethod

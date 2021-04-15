@@ -16,7 +16,7 @@ class Implementation(ABC):
     
 class ImplementationDefault(Implementation):
     url = "https://covid-tracker-us.herokuapp.com"
-    def __init__(data_source="jhu"):
+    def __init__(self,data_source="jhu"):
         self.data_source = data_source
 
     @staticmethod
@@ -30,7 +30,7 @@ class ImplementationDefault(Implementation):
 
 class ImplementationMirror(Implementation):
     url = "https://cvtapi.nl"
-    def __init__(data_source="jhu"):
+    def __init__(self,data_source="jhu"):
         self.data_source = data_source
 
     @staticmethod
@@ -44,7 +44,7 @@ class ImplementationMirror(Implementation):
 
 class ImplementationMirror1(Implementation):
     url = "http://covid19-api.kamaropoulos.com"
-    def __init__(data_source="jhu"):
+    def __init__(self,data_source="jhu"):
         self.data_source = data_source
 
     @staticmethod
