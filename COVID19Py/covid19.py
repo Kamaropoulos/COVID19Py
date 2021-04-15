@@ -71,6 +71,15 @@ class COVID19(object):
         response.raise_for_status()
         return response.json()
 
+class getGeneral:
+    def getAll(self, timelines=False):
+        pass
+    def getLatestChanges(self):
+        pass
+    def getLatest(self) -> List[Dict[str, int]]:
+        pass
+
+class getGeneralInfo(getGeneral):
     def getAll(self, timelines=False):
         self._update(timelines)
         return self.latestData
@@ -98,6 +107,11 @@ class COVID19(object):
         data = self._request("/v2/latest")
         return data["latest"]
 
+class getLocationGeneric:
+    def getLocations(self, timelines=False, rank_by: str = None) -> List[Dict]:
+        pass
+
+class getInfoFromLocationGeneric(getLocationGeneric):
     def getLocations(self, timelines=False, rank_by: str = None) -> List[Dict]:
         """
         Gets all locations affected by COVID-19, as well as latest case data.
@@ -123,6 +137,15 @@ class COVID19(object):
 
         return data
 
+class getLocationSpecific:
+    def getLocationByCountryCode(self, country_code, timelines=False) -> List[Dict]:
+        pass
+    def getLocationByCountry(self, country, timelines=False) -> List[Dict]:
+        pass
+    def getLocationById(self, country_id: int):
+        pass
+
+class getInfoFromLocationSpecific(getLocationSpecific):
     def getLocationByCountryCode(self, country_code, timelines=False) -> List[Dict]:
         """
         :param country_code: String denoting the ISO 3166-1 alpha-2 code (https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) of the country
