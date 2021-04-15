@@ -2,8 +2,8 @@ from typing import Dict, List
 import requests
 import json
 
+# COVID19 class but with the application of the Singleton Creational Design Pattern
 class COVID19(object):
-    # 
     default_url = "https://covid-tracker-us.herokuapp.com"
     url = ""
     data_source = ""
