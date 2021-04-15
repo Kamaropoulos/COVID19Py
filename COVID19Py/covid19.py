@@ -1,51 +1,72 @@
 from typing import Dict, List
 import requests
 import json
+import threading
 
-class COVID19(object):
+# This singleton class is a metaclass that make sure that there's only one system controlling the requests from the users
+
+class Singleton(type):
+    
+    # This is a private, static dictionary instance that stores the cases for different countries
+    _sourceInstance = {}
+    # To ensure safety during multi-threading, we need to lock the object when creating it
+    _objLock: Lock = Lock()
+
+    @staticmethod
+    def __call__(source, *args, **kwargs):
+        # When the object is correctly locked during its creation
+        with source._objLock:
+            # If the object is not occured in the list
+            if source not in source._csourceInstance:
+                """ 
+                then we can let the metaclass cover the inheritance 
+                and create the singleton instance
+                """
+                singletonInstance = super().__call__(*args,**kwargs)
+                source._sourceInstance[source] = singletonInstance
+        return source._sourceInstance[source]
+
+class COVID19(object, metaclass = Singleton):
     default_url = "https://covid-tracker-us.herokuapp.com"
     url = ""
     data_source = ""
     previousData = None
     latestData = None
-    _valid_data_sources = []
 
     mirrors_source = "https://raw.github.com/Kamaropoulos/COVID19Py/master/mirrors.json"
     mirrors = None
 
-    def __init__(self, url="https://covid-tracker-us.herokuapp.com", data_source='jhu'):
-        # Skip mirror checking if custom url was passed
+    # Added _sourceInstance in the parameter
+    def __init__(self, url="https://covid-tracker-us.herokuapp.com", data_source, _sourceInstance):
+       # Skip mirror checking if custom url was passed
         if url == self.default_url:
             # Load mirrors
             response = requests.get(self.mirrors_source)
             response.raise_for_status()
             self.mirrors = response.json()
-
-            # Try to get sources as a test
-            for mirror in self.mirrors:
-                # Set URL of mirror
-                self.url = mirror["url"]
-                result = None
+        
+            # Add sources' urls and providers in the _sourceInstance dict
+            for sources in self.mirrors:
+                _sourceInstance.add(mirror["provider"], mirror["url"])
                 try:
+                    # see if the url is from one of the providers
                     result = self._getSources()
                 except Exception as e:
-                    # URL did not work, reset it and move on
+                    # url is not in the database, reset it and move on
                     self.url = ""
                     continue
-
-                # TODO: Should have a better health-check, this is way too hacky...
-                if "jhu" in result:
-                    # We found a mirror that worked just fine, let's stick with it
-                    break
-
+            
                 # None of the mirrors worked. Raise an error to inform the user.
                 raise RuntimeError("No available API mirror was found.")
-
+        
         else:
             self.url = url
-
-        self._valid_data_sources = self._getSources()
-        if data_source not in self._valid_data_sources:
+        
+        """ 
+        if the input data_source is not in the dictionary 
+        that contains all the vaild sources, raise error
+        """
+        if data_source not in self._sourceInstance:
             raise ValueError("Invalid data source. Expected one of: %s" % self._valid_data_sources)
         self.data_source = data_source
 
@@ -156,3 +177,4 @@ class COVID19(object):
         """
         data = self._request("/v2/locations/" + str(country_id))
         return data["location"]
+
