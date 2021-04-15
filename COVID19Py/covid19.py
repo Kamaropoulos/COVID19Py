@@ -2,7 +2,6 @@ from typing import Dict, List
 import requests
 import json
 
-# COVID19 class but with the application of the Singleton Creational Design Pattern
 class COVID19(object):
     default_url = "https://covid-tracker-us.herokuapp.com"
     url = ""
@@ -14,17 +13,7 @@ class COVID19(object):
     mirrors_source = "https://raw.github.com/Kamaropoulos/COVID19Py/master/mirrors.json"
     mirrors = None
 
-    # Declaration of single private static instance of the class. Done to fulfill requirement for the Singleton Creational Design Pattern.
-    __singlePrivateInstance = None
-
-    # Constructor. Already privated, meaning that its already fulfills a requirement for the Singleton Creational Design Pattern.
     def __init__(self, url="https://covid-tracker-us.herokuapp.com", data_source='jhu'):
-
-	# Checks to see if an instance has already been created. If it has, we put out an error message. Otherwise, we create a new instance.
-        if COVID19.__singlePrivateInstance != None:
-	    raise Exception("Singleton pattern has been applied. An instance was previously created, hence new instance cannot be created. Use getCOVID19Instance() to access the instance.")
-        else:
-            COVID19.__singlePrivateInstance = self
 
         # Skip mirror checking if custom url was passed
         if url == self.default_url:
@@ -60,14 +49,6 @@ class COVID19(object):
         if data_source not in self._valid_data_sources:
             raise ValueError("Invalid data source. Expected one of: %s" % self._valid_data_sources)
         self.data_source = data_source
-
-
-    # Public method that allows access to the single instance. Requirement for Singleton Creation Design Pattern.
-    @staticmethod
-    def getCOVID19Instance():
-        if COVID19.__singlePrivateInstance == None
-            COVID19()
-        return COVID19.__singlePrivateInstance
 
 
     # Updates to latest data
