@@ -12,8 +12,20 @@ class COVID19(object):
 
     mirrors_source = "https://raw.github.com/Kamaropoulos/COVID19Py/master/mirrors.json"
     mirrors = None
+    
+    __privateInstance = None
+    
 
     def __init__(self, url="https://covid-tracker-us.herokuapp.com", data_source='jhu'):
+        
+        
+        #Checks for instance of COVID19Py. If one is currently present then an error is thrown, else a new instance is created
+        if COVID19.__singlePrivateInstance != None:
+	    raise Exception("Instance of the COVID19Py has already been created")
+        else:
+            COVID19.__singlePrivateInstance = self
+        
+        
         # Skip mirror checking if custom url was passed
         if url == self.default_url:
             # Load mirrors
@@ -48,6 +60,14 @@ class COVID19(object):
         if data_source not in self._valid_data_sources:
             raise ValueError("Invalid data source. Expected one of: %s" % self._valid_data_sources)
         self.data_source = data_source
+        
+        
+        
+    @staticmethod
+    def getInstance():
+        if COVID19.__privateInstance == None
+            COVID19()
+        return COVID19.__privateInstance
 
     def _update(self, timelines):
         latest = self.getLatest()
