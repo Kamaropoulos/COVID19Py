@@ -1,7 +1,7 @@
 from typing import Dict, List
 import requests
 import json
-
+from abc import ABCMeta, abstractmethod
 
 class COVID19(object):
     default_url = "https://covid-tracker-us.herokuapp.com"
@@ -78,12 +78,12 @@ class COVID19(object):
 
     def getLatestChanges(self):
         changes = None
-        changeMake = confirmCases(self.latestData["latest"]["confirmed"] - self.latestData["latest"]["confirmed"], self.latestData["latest"]["deaths"] - self.latestData["latest"]["deaths"], self.latestData["latest"]["recovered"] - self.latestData["latest"]["recovered"])
+        changeMake = CasesDirector.construct()
         if self.previousData:
             changes = {
-                "confirmed": changeMake.confirmed,
-                "deaths": changeMake.goToDetails().detailsVariable.deaths,
-                "recovered": changeMake.goToDetails().detailsVariable.recovered,
+                "confirmed": changeMake.caseList[0],
+                "deaths": changeMake.caseList[1],
+                "recovered": changeMake.caseList[2],
             }
         else:
             changes = {
@@ -159,16 +159,69 @@ class COVID19(object):
         data = self._request("/v2/locations/" + str(country_id))
         return data["location"]
 
-class confirmCases:
-    def __init__(self, confirmed, deaths, recovered):
-        self.confirmed = confirmed
-        self.deaths = deaths
-        self.recovered = recovered
+class CasesIBuilder(metaclass=ABCMeta):
+    "The Builder Interface"
 
-    def goToDetails(self):
-        detailsVariable = caseDetails(self.deaths, self.recovered)
+    @staticmethod
+    @abstractmethod
+    def confirmed_cases():
+        "Function for confirmed cases data"
 
-class caseDetails:
-    def __init__(self, deaths, recovered):
-        self.deaths = deaths
-        self.recovered = recovered
+    @staticmethod
+    @abstractmethod
+    def deaths_cases():
+        "Function for deaths data"
+
+    @staticmethod
+    @abstractmethod
+    def recovered_cases():
+        "Function for recovered data"
+
+    @staticmethod
+    @abstractmethod
+    def get_result():
+        "Return the final product"
+
+class CasesBuilder(IBuilder):
+    "The Concrete Builder."
+
+    def __init__(self):
+        self.cases = cases()
+
+    def confirmed_cases(self):
+        self.cases.confirmed(self.latestData["latest"]["confirmed"] - self.latestData["latest"]["confirmed"])
+        return self
+
+    def deaths_cases(self):
+        self.cases.deaths(self.latestData["latest"]["deaths"] - self.latestData["latest"]["deaths"])
+        return self
+
+    def recovered_cases(self):
+        self.cases.recovered(self.latestData["latest"]["recovered"] - self.latestData["latest"]["recovered"])
+        return self
+
+    def get_result(self):
+        return self.cases
+
+class cases:
+    def __init__(self):
+        self.caseList = []
+        caseList[:] = [] #clear the references of the list
+    def confirmed(self, confirm):
+        return self.caseList.append(confirm)
+    def deaths(self, death):
+        return self.caseList.append(death)
+    def recovered(self, recover):
+        return self.caseList.append(recover)
+
+class CasesDirector:
+    "The Director, building a complex representation."
+
+    @staticmethod
+    def construct():
+        "Constructs and returns the final product"
+        return CasesBuilder()\
+            .confirmed_cases()\
+            .deaths_cases()\
+            .recovered_cases()\
+            .get_result()
