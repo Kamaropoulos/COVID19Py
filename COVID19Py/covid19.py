@@ -9,9 +9,18 @@ class COVID19(object):
     previousData = None
     latestData = None
     _valid_data_sources = []
+    _instance = None
 
     mirrors_source = "https://raw.github.com/Kamaropoulos/COVID19Py/master/mirrors.json"
     mirrors = None
+
+    def _new_(self):
+        if not self.instance:
+            self.instance = super(COVID19, self).__new__(self)
+            COVID19()
+            return COVID19._instance
+        else:
+            raise Exception("Instance already exists.")
 
     def __init__(self, url="https://covid-tracker-us.herokuapp.com", data_source='jhu'):
         # Skip mirror checking if custom url was passed
