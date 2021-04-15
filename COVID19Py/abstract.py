@@ -5,7 +5,7 @@ import json
 
 class AbstractAPI(ABC):
     def __init__(self,implementation):
-        self.implementation = implementation()
+        self.implementation = implementation
         self.previousData = None
         self.latestData = None
     @abstractmethod
@@ -50,12 +50,15 @@ class AbstractAPI(ABC):
 
 
 class COVIDAPI(AbstractAPI):
+
+    def __init__(self,implementation):
+        super().__init__(implementation)
     def _update(self, timelines):
         latest = self.getLatest()
         locations = self.getLocations(timelines)
-        if self.implementation:
-            self.implementation = self.implementation
-        self.implementation = {
+        if self.latestData:
+            self.previousData = self.latestData
+        self.latestData = {
             "latest": latest,
             "locations": locations
         }
@@ -63,7 +66,7 @@ class COVIDAPI(AbstractAPI):
     def _request(self, endpoint, params=None):
         if params is None:
             params = {}
-        response = response.get(self.implementation.url+endpoint,{**params,"source":self.implementation.data_source})
+        response = requests.get(self.implementation.url+endpoint,{**params,"source":self.implementation.data_source})
         response.raise_for_status()
         return response.json()
 
@@ -73,11 +76,11 @@ class COVIDAPI(AbstractAPI):
 
     def getLatestChanges(self):
         changes = None
-        if self.implementation.previousData:
+        if self.previousData:
             changes = {
-                "confirmed": self.implementation.latestData["latest"]["confirmed"] - self.implementation.latestData["latest"]["confirmed"],
-                "deaths": self.implementation.latestData["latest"]["deaths"] - self.implementation.latestData["latest"]["deaths"],
-                "recovered": self.implementation.latestData["latest"]["recovered"] - self.implementation.latestData["latest"]["recovered"],
+                "confirmed": self.latestData["latest"]["confirmed"] - self.latestData["latest"]["confirmed"],
+                "deaths": self.latestData["latest"]["deaths"] - self.latestData["latest"]["deaths"],
+                "recovered": self.latestData["latest"]["recovered"] - self.latestData["latest"]["recovered"],
             }
         else:
             changes = {

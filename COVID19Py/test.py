@@ -2,4 +2,4 @@ from abstract import COVIDAPI
 from implementation import ImplementationDefault
 
 
-print(COVIDAPI(ImplementationDefault()).getLatest())
+print(COVIDAPI(ImplementationDefault()).getAll())
