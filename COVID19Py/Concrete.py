@@ -8,7 +8,7 @@ class ConcreteAPIDefault(ICOVID19):
     url = "https://covid-tracker-us.herokuapp.com"
 
     def __init__(self, data_source):
-        print("url", self.url)
+      
         result = get(self.url+"/v2/sources")
         result.raise_for_status()
         sources = result.json()["sources"]
@@ -22,7 +22,7 @@ class ConcreteAPIDefault(ICOVID19):
         self.latestData = None
 
     def _request(self, endpoint, params=None):
-        print("datasource",self.data_source)
+        
         if (params is None):
             params = {}
         res = get(self.url+endpoint, {**params, "source": self.data_source})

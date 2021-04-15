@@ -1,5 +1,5 @@
 from abc import ABCMeta, abstractmethod
-from concrete import ConcreteAPIDefault,ConcreteAPIMirror
+from Concrete import ConcreteAPIDefault,ConcreteAPIMirror
 from enum import Enum
 
 class Source(Enum):
@@ -10,7 +10,7 @@ class Source(Enum):
 class COVID19:
 
     @staticmethod
-    def create_object(mirror:int,data_source:str):
+    def create_object(mirror:int,data_source:str="jhu"):
         if mirror == Source.Default:
             return ConcreteAPIDefault(data_source)        
         if mirror == Source.Mirror:
