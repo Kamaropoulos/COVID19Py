@@ -3,20 +3,67 @@ import requests
 import json
 
 class COVID19(object):
+__metaclass__ = SingletonMeta
+
+COVID19InfoTool retrievalTool
+
+    def __init__(self):
+        retrievalTool = COVID19InfoTool()
+
+    def _update(self, timelines):
+        retrievalTool._update(timelines)
+
+    def _getSources(self):
+        return retrievalTool._getSources()
+
+    def _request(self, endpoint, params=None):
+        return retrievalTool._request(endpoint, params)
+
+    def getAll(self, timelines = False):
+        return retrievalTool.getAll(timelines)
+
+    def getLatestChanges(self):
+        return retrievalTool.getLatestChanges()
+
+    def getLatest(self) -> List[Dict[str, int]]:
+        return retrievalTool.getLatest()
+
+    def getLocations(self, timelines=False, rank_by: str = None) -> List[Dict]:
+        return retrievalTool.getLocations(timelines)
+
+    def getLocationByCountryCode(self, country_code, timelines=False) -> List[Dict]:
+        return retrievalTool.getLocationByCountryCode(country_code, timelines)
+
+    def getLocationByCountry(self, country, timelines=False) -> List[Dict]:
+        return retrievalTool.getLocationByCountry(country, timelines)
+
+    def getLocationById(self, country_id: int):
+        return retrievalTool.getLocationById(country_id)
+
+
+class SingletonMeta(type):
+    _instances = {}
+
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super(SingletonMeta, cls).__call__(*args, **kwargs)
+        return cls._instances[cls]
+
+class COVID19InfoTool(object):
+    __metaclass__ = SingletonMeta
+
     default_url = "https://covid-tracker-us.herokuapp.com"
     url = ""
     data_source = ""
     previousData = None
     latestData = None
     _valid_data_sources = []
-	CaseOccurrence co
 
     mirrors_source = "https://raw.github.com/Kamaropoulos/COVID19Py/master/mirrors.json"
     mirrors = None
 
     def __init__(self, url="https://covid-tracker-us.herokuapp.com", data_source='jhu'):
-        co = CaseOccurrence()
-		# Skip mirror checking if custom url was passed
+        # Skip mirror checking if custom url was passed
         if url == self.default_url:
             # Load mirrors
             response = requests.get(self.mirrors_source)
@@ -97,88 +144,10 @@ class COVID19(object):
         """
         :return: The latest amount of total confirmed cases, deaths, and recoveries.
         """
-        return co.getCases
-
-    def getLocations(self, timelines=False, rank_by: str = None) -> List[Dict]:
-        """
-        Gets all locations affected by COVID-19, as well as latest case data.
-        :param timelines: Whether timeline information should be returned as well.
-        :param rank_by: Category to rank results by. ex: confirmed
-        :return: List of dictionaries representing all affected locations.
-        """
-
-        return co.getLocation(timelines, rank_by)
-
-    def getLocationByCountryCode(self, country_code, timelines=False) -> List[Dict]:
-        """
-        :param country_code: String denoting the ISO 3166-1 alpha-2 code (https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) of the country
-        :param timelines: Whether timeline information should be returned as well.
-        :return: A list of areas that correspond to the country_code. If the country_code is invalid, it returns an empty list.
-        """
-        
-        return co.getLocation(country_code, timelines)
-    
-    def getLocationByCountry(self, country, timelines=False) -> List[Dict]:
-        """
-        :param country: String denoting name of the country
-        :param timelines: Whether timeline information should be returned as well.
-        :return: A list of areas that correspond to the country name. If the country is invalid, it returns an empty list.
-        """
-        
-        return co.getLocation(country)
-
-    def getLocationById(self, country_id: int):
-        """
-        :param country_id: Country Id, an int
-        :return: A dictionary with case information for the specified location.
-        """
-        
-        return co.getLocation(country_id)
-		
-class CovidCases(object):
-	
-	dataList
-	def __init__(self)
-		dataList = []
-		
-	def getLatest(self) -> List[Dict[str, int]]:
-        """
-        :return: The latest amount of total confirmed cases, deaths, and recoveries.
-        """
         data = self._request("/v2/latest")
         return data["latest"]
 
-		# might seem redundant, however to avoid this and make proper use of agregates alot of code would have to rewritten
-	def _request(self, endpoint, params=None):
-        if params is None:
-            params = {}
-        response = requests.get(self.url + endpoint, {**params, "source":self.data_source})
-        response.raise_for_status()
-        return response.json()
-		
-	def update(self)
-		dataList = getLatest()
-		
-class CaseLocation(object):
-	
-	dataList
-	def __init__(self)
-		dataList = []
-		
-	def getLocationByCountry(self, country, timelines=False) -> List[Dict]:
-        """
-        :param country: String denoting name of the country
-        :param timelines: Whether timeline information should be returned as well.
-        :return: A list of areas that correspond to the country name. If the country is invalid, it returns an empty list.
-        """
-        data = None
-        if timelines:
-            data = self._request("/v2/locations", {"country": country, "timelines": str(timelines).lower()})
-        else:
-            data = self._request("/v2/locations", {"country": country})
-        return data["locations"]	
-	
-	def getLocations(self, timelines=False, rank_by: str = None) -> List[Dict]:
+    def getLocations(self, timelines=False, rank_by: str = None) -> List[Dict]:
         """
         Gets all locations affected by COVID-19, as well as latest case data.
         :param timelines: Whether timeline information should be returned as well.
@@ -192,7 +161,7 @@ class CaseLocation(object):
             data = self._request("/v2/locations")
 
         data = data["locations"]
-        
+
         ranking_criteria = ['confirmed', 'deaths', 'recovered']
         if rank_by is not None:
             if rank_by not in ranking_criteria:
@@ -215,60 +184,24 @@ class CaseLocation(object):
         else:
             data = self._request("/v2/locations", {"country_code": country_code})
         return data["locations"]
-    
-	def getLocationById(self, country_id: int):
+
+    def getLocationByCountry(self, country, timelines=False) -> List[Dict]:
+        """
+        :param country: String denoting name of the country
+        :param timelines: Whether timeline information should be returned as well.
+        :return: A list of areas that correspond to the country name. If the country is invalid, it returns an empty list.
+        """
+        data = None
+        if timelines:
+            data = self._request("/v2/locations", {"country": country, "timelines": str(timelines).lower()})
+        else:
+            data = self._request("/v2/locations", {"country": country})
+        return data["locations"]
+
+    def getLocationById(self, country_id: int):
         """
         :param country_id: Country Id, an int
         :return: A dictionary with case information for the specified location.
         """
         data = self._request("/v2/locations/" + str(country_id))
-        return data["location"]	
-	
-	def _request(self, endpoint, params=None):
-        if params is None:
-            params = {}
-        response = requests.get(self.url + endpoint, {**params, "source":self.data_source})
-        response.raise_for_status()
-        return response.json()
-	
-	# method overloading
-	def update(self, country, timelines=False)
-		dataList = getLocationByCountry(country, timelines)
-	
-	def update(self, timelines=False, rank_by: str = None)
-		dataList = getLocations(timelines, rank_by)
-	
-	def update(self, country_code, timelines=False)
-		dataList = getLocationByCountryCode(country_code, timelines)
-	
-	def update(self, country_id)
-		dataList = getLocationById(country_id)
-		
-class CaseOccurrence(object):
-	CovidCases cc
-	CaseLocation cl
-	
-	def _init_(self):
-		cc = CovidCases()
-		cl = CaseLocation()
-	
-		# not sure if self needs to be used here
-	def getLocation(self, country, timelines=False) -> List[Dict]:
-		cl.update(country)
-		return cl.dataList
-		
-	def getLocation(self, timelines=False, rank_by: str = None) -> List[Dict]:
-		cl.update(timelines, rank_by)
-		return cl.dataList
-		
-	def getLocation(self, country_code, timelines=False) -> List[Dict]:
-		cl.update(country_code, timelines)
-		return cl.dataList
-	
-	def getLocation(self, country_id: int):
-		cl.update(country_id)
-		return cl.dataList
-		
-	def getCases(self):
-		cc.update()
-		return cc.dataLis
+        return data["location"]
