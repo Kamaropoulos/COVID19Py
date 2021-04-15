@@ -9,11 +9,16 @@ class COVID19(object):
     previousData = None
     latestData = None
     _valid_data_sources = []
+    __covid19Instance = None
 
     mirrors_source = "https://raw.github.com/Kamaropoulos/COVID19Py/master/mirrors.json"
     mirrors = None
 
     def __init__(self, url="https://covid-tracker-us.herokuapp.com", data_source='jhu'):
+        if COVID19.__covid19Instance == None:
+            COVID19.__covid19Instance = getInstance()
+        else: 
+            raise Exception("You already have one instance of COVID19.")
         # Skip mirror checking if custom url was passed
         if url == self.default_url:
             # Load mirrors
@@ -70,6 +75,11 @@ class COVID19(object):
         response = requests.get(self.url + endpoint, {**params, "source":self.data_source})
         response.raise_for_status()
         return response.json()
+
+    def getInstance():
+        if COVID19.__covid19Instance == None:
+            Singleton = COVID19()
+        return Singleton
 
     def getAll(self, timelines=False):
         self._update(timelines)
