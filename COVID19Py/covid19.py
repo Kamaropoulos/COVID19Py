@@ -71,6 +71,13 @@ class DataSource(DataSourceAbstract):
         response.raise_for_status()
         return response.json()["sources"]
 
+    def _request(self, endpoint, params=None):
+        if params is None:
+            params = {}
+        response = requests.get(self.url + endpoint, {**params, "source":self.data_source})
+        response.raise_for_status()
+        return response.json()       
+
 
 class COVID19Abstract():
 
