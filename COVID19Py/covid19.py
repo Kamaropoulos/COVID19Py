@@ -2,7 +2,12 @@ from typing import Dict, List
 import requests
 import json
 
+
 class COVID19(object):
+
+    __instance = None
+
+    
     default_url = "https://covid-tracker-us.herokuapp.com"
     url = ""
     data_source = ""
@@ -14,40 +19,52 @@ class COVID19(object):
     mirrors = None
 
     def __init__(self, url="https://covid-tracker-us.herokuapp.com", data_source='jhu'):
-        # Skip mirror checking if custom url was passed
-        if url == self.default_url:
-            # Load mirrors
-            response = requests.get(self.mirrors_source)
-            response.raise_for_status()
-            self.mirrors = response.json()
-
-            # Try to get sources as a test
-            for mirror in self.mirrors:
-                # Set URL of mirror
-                self.url = mirror["url"]
-                result = None
-                try:
-                    result = self._getSources()
-                except Exception as e:
-                    # URL did not work, reset it and move on
-                    self.url = ""
-                    continue
-
-                # TODO: Should have a better health-check, this is way too hacky...
-                if "jhu" in result:
-                    # We found a mirror that worked just fine, let's stick with it
-                    break
-
-                # None of the mirrors worked. Raise an error to inform the user.
-                raise RuntimeError("No available API mirror was found.")
-
+             
+        if COVID19.__instance != None:
+            raise Exception("Already Created")
         else:
-            self.url = url
+            COVID19.__instance = self
+
+            # Skip mirror checking if custom url was passed
+            if url == self.default_url:
+                # Load mirrors
+                response = requests.get(self.mirrors_source)
+                response.raise_for_status()
+                self.mirrors = response.json()
+
+                # Try to get sources as a test
+                for mirror in self.mirrors:
+                    # Set URL of mirror
+                    self.url = mirror["url"]
+                    result = None
+                    try:
+                        result = self._getSources()
+                    except Exception as e:
+                        # URL did not work, reset it and move on
+                        self.url = ""
+                        continue
+
+                    # TODO: Should have a better health-check, this is way too hacky...
+                    if "jhu" in result:
+                        # We found a mirror that worked just fine, let's stick with it
+                        break
+
+                    # None of the mirrors worked. Raise an error to inform the user.
+                    raise RuntimeError("No available API mirror was found.")
+
+            else:
+                self.url = url
 
         self._valid_data_sources = self._getSources()
         if data_source not in self._valid_data_sources:
             raise ValueError("Invalid data source. Expected one of: %s" % self._valid_data_sources)
         self.data_source = data_source
+
+    @staticmethod 
+    def getInstance():
+        if COVID19.__instance == None:
+            COVID19()
+        return COVID19.__instance    
 
     def _update(self, timelines):
         latest = self.getLatest()
