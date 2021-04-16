@@ -29,3 +29,9 @@ class Adapter(covidInterface):
     def getDeath(self):
         return self.covid19.getLatest()["deaths"]
     
+    def getRecovered(self):
+        return self.covid19.getLatest()["recovered"]
+    
+    def getconfirmed(self):
+        return self.covid19.getLatest()["confirmed"]
+    
