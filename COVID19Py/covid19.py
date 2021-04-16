@@ -2,6 +2,29 @@ from typing import Dict, List
 import requests
 import json
 
+
+
+class LatestCases():
+    def output(self):
+        pass
+
+
+class TypeDecorator(object):
+    _latestCases: LatestCases = None
+
+    def __init__(self, latestCases: LatestCases):
+        self._latestCases = latestCases
+
+    @property
+    def latestCases(self):
+        return self._latestCases
+
+    def output(self):
+        return self._latestCases['confirmed', 'deaths', 'recovered']
+
+
+
+
 class COVID19(object):
     default_url = "https://covid-tracker-us.herokuapp.com"
     url = ""
@@ -95,8 +118,8 @@ class COVID19(object):
         """
         :return: The latest amount of total confirmed cases, deaths, and recoveries.
         """
-        data = self._request("/v2/latest")
-        return data["latest"]
+        data = TypeDecorator(self._request("/v2/latest"))
+        return data
 
     def getLocations(self, timelines=False, rank_by: str = None) -> List[Dict]:
         """
