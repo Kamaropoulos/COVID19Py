@@ -1,1 +1,1 @@
-from .covid19 import COVIDSingleton
+from .covid19 import COVID19

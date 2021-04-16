@@ -2,26 +2,19 @@ from typing import Dict, List
 import requests
 import json
 
-class COVIDSingleton(object):
-
-    
+class COVID19(object):
     default_url = "https://covid-tracker-us.herokuapp.com"
     url = ""
     data_source = ""
     previousData = None
     latestData = None
-    __instance = None
     _valid_data_sources = []
 
     mirrors_source = "https://raw.github.com/Kamaropoulos/COVID19Py/master/mirrors.json"
     mirrors = None
-
+    
     def __init__(self, url="https://covid-tracker-us.herokuapp.com", data_source='jhu'):
-        
-        if COVIDSingleton.__instance is None:
-                COVIDSingleton.__instance = object.__new__(self)
-                     
-       # Skip mirror checking if custom url was passed 
+        # Skip mirror checking if custom url was passed
         if url == self.default_url:
             # Load mirrors
             response = requests.get(self.mirrors_source)
@@ -56,13 +49,6 @@ class COVIDSingleton(object):
             raise ValueError("Invalid data source. Expected one of: %s" % self._valid_data_sources)
         self.data_source = data_source
 
-    def SingletonInstance():
-        if COVIDSingleton.__instance is not None:
-            return COVIDSingleton._instance
-        else:
-            COVIDSingleton()
-            return COVIDSingleton._intance
-        
     def _update(self, timelines):
         latest = self.getLatest()
         locations = self.getLocations(timelines)
@@ -84,7 +70,41 @@ class COVIDSingleton(object):
         response = requests.get(self.url + endpoint, {**params, "source":self.data_source})
         response.raise_for_status()
         return response.json()
+    
+class Retrieve_Abstract:
+    
+    @abstractmethod
+    def getAll(self,timelines=False):
+        pass
 
+     @abstractmethod:
+    def getLatestChanges(self):
+        pass
+    
+    @abstractmethod
+    def getLatest(self)-> List[Dict[str, int]]:
+        pass
+    
+class Retrieve_Locations:
+    
+    @abstractmethod
+    def getLocations(self, timelines=False, rank_by: str = None) -> List[Dict]:
+        pass
+
+    @abstractmethod
+    def getLocationByCountryCode(self, country_code, timelines=False) -> List[Dict]:
+        pass
+
+    @abstractmethod
+    def getLocationByCountry(self, country, timelines=False) -> List[Dict]:
+        pass
+    
+    @abstractmethod 
+    def getLocationById(self, country_id: int):
+        pass
+
+class Retrieve_Bridge(Retrieve_Abstract):
+    
     def getAll(self, timelines=False):
         self._update(timelines)
         return self.latestData
@@ -111,7 +131,12 @@ class COVIDSingleton(object):
         """
         data = self._request("/v2/latest")
         return data["latest"]
+    
 
+
+   
+class Location_Bridge(Retrieve_Locations):
+    
     def getLocations(self, timelines=False, rank_by: str = None) -> List[Dict]:
         """
         Gets all locations affected by COVID-19, as well as latest case data.
