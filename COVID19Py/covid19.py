@@ -1,16 +1,9 @@
 from typing import Dict, List
 import requests
 import json
-import abc
 
-class covidInterface(abc.ABC):
-    @abc.abstractclassmethod
-    def getLocation():
-    pass
 
-    @abc.abstractclassmethod
-    def getLocation():
-    pass
+
 
 
 class COVID19(object):
