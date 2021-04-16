@@ -4,22 +4,7 @@ import requests
 import json
 
 
-class OverallCovidAbstract():
-    
-    @abstractmethod
-    def getLatestChanges(self):
-     pass
 
-    @abstractmethod    
-    def getLatest(self) -> List[Dict[str, int]]:
-        pass
-
-    @abstractmethod    
-    def getLocations(self):
-        pass
-    @abstractmethod    
-    def getAll(self):
-        pass
 
 class DataSourceAbstract():
     
