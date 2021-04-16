@@ -1,8 +1,40 @@
 from typing import Dict, List
+from abc import ABC, abstractmethod
 import requests
 import json
 
-class COVID19(object):
+
+class OverallCovidAbstract():
+    
+    @abstractmethod
+    def getLatestChanges(self):
+     pass
+
+    @abstractmethod    
+    def getLatest(self) -> List[Dict[str, int]]:
+        pass
+
+    @abstractmethod    
+    def getLocations(self):
+        pass
+    @abstractmethod    
+    def getAll(self):
+        pass
+
+class DataSourceAbstract():
+    
+    @abstractmethod
+    def _getSources(self):
+        pass
+
+    @abstractmethod
+    def _request(self):
+        pass        
+
+
+class DataSource(DataSourceAbstract):
+
+            
     default_url = "https://covid-tracker-us.herokuapp.com"
     url = ""
     data_source = ""
@@ -49,7 +81,73 @@ class COVID19(object):
             raise ValueError("Invalid data source. Expected one of: %s" % self._valid_data_sources)
         self.data_source = data_source
 
-    def _update(self, timelines):
+    def _getSources(self):
+        response = requests.get(self.url + "/v2/sources")
+        response.raise_for_status()
+        return response.json()["sources"]
+
+
+class COVID19Abstract():
+
+    @abstractmethod
+    def _update(self):
+        pass
+
+    @abstractmethod
+    def getAll(self):
+        pass
+        
+    @abstractmethod
+    def getLatestChanges(self):
+        pass      
+
+    @abstractmethod
+    def getLatest(self):
+        pass
+
+    @abstractmethod
+    def getLocations(self, timelines=False, rank_by: str = None) -> List[Dict]:
+        pass
+
+    @abstractmethod
+    def getLocationByCountryCode(self, country_code, timelines=False) -> List[Dict]:
+        pass
+
+    @abstractmethod
+    def getLatest(self):
+        pass
+    
+    @abstractmethod
+    def getLocationByCountry(self, country, timelines=False) -> List[Dict]:
+        pass
+
+
+    @abstractmethod
+    def getLocationById(self, country_id: int):
+       pass  
+
+class COVID19(COVID19Abstract):
+     default_url = "https://covid-tracker-us.herokuapp.com"
+     url = ""
+     data_source = ""
+     previousData = None
+     latestData = None
+     _valid_data_sources = []
+
+     mirrors_source = "https://raw.github.com/Kamaropoulos/COVID19Py/master/mirrors.json"
+     mirrors = None
+
+
+     def __init__(self,url,data_source):
+
+         if url != "":
+             self.url = url
+         else:    
+             self.url = default_url
+         
+         DataSource( url="https://covid-tracker-us.herokuapp.com", data_source='jhu')
+
+     def _update(self, timelines):
         latest = self.getLatest()
         locations = self.getLocations(timelines)
         if self.latestData:
@@ -59,23 +157,17 @@ class COVID19(object):
             "locations": locations
         }
 
-    def _getSources(self):
-        response = requests.get(self.url + "/v2/sources")
-        response.raise_for_status()
-        return response.json()["sources"]
+    
 
-    def _request(self, endpoint, params=None):
-        if params is None:
-            params = {}
-        response = requests.get(self.url + endpoint, {**params, "source":self.data_source})
-        response.raise_for_status()
-        return response.json()
+     
+        
+        
 
-    def getAll(self, timelines=False):
+     def getAll(self, timelines=False):
         self._update(timelines)
         return self.latestData
 
-    def getLatestChanges(self):
+     def getLatestChanges(self):
         changes = None
         if self.previousData:
             changes = {
@@ -91,14 +183,14 @@ class COVID19(object):
             }
         return changes
 
-    def getLatest(self) -> List[Dict[str, int]]:
+     def getLatest(self) -> List[Dict[str, int]]:
         """
         :return: The latest amount of total confirmed cases, deaths, and recoveries.
         """
         data = self._request("/v2/latest")
         return data["latest"]
 
-    def getLocations(self, timelines=False, rank_by: str = None) -> List[Dict]:
+     def getLocations(self, timelines=False, rank_by: str = None) -> List[Dict]:
         """
         Gets all locations affected by COVID-19, as well as latest case data.
         :param timelines: Whether timeline information should be returned as well.
@@ -107,9 +199,9 @@ class COVID19(object):
         """
         data = None
         if timelines:
-            data = self._request("/v2/locations", {"timelines": str(timelines).lower()})
+            data = DataSource()._request("/v2/locations", {"timelines": str(timelines).lower()})
         else:
-            data = self._request("/v2/locations")
+            data = DataSource()._request("/v2/locations")
 
         data = data["locations"]
         
@@ -123,7 +215,7 @@ class COVID19(object):
 
         return data
 
-    def getLocationByCountryCode(self, country_code, timelines=False) -> List[Dict]:
+     def getLocationByCountryCode(self, country_code, timelines=False) -> List[Dict]:
         """
         :param country_code: String denoting the ISO 3166-1 alpha-2 code (https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) of the country
         :param timelines: Whether timeline information should be returned as well.
@@ -131,12 +223,12 @@ class COVID19(object):
         """
         data = None
         if timelines:
-            data = self._request("/v2/locations", {"country_code": country_code, "timelines": str(timelines).lower()})
+            data = DataSource()._request("/v2/locations", {"country_code": country_code, "timelines": str(timelines).lower()})
         else:
-            data = self._request("/v2/locations", {"country_code": country_code})
+            data = DataSource()._request("/v2/locations", {"country_code": country_code})
         return data["locations"]
     
-    def getLocationByCountry(self, country, timelines=False) -> List[Dict]:
+     def getLocationByCountry(self, country, timelines=False) -> List[Dict]:
         """
         :param country: String denoting name of the country
         :param timelines: Whether timeline information should be returned as well.
@@ -144,15 +236,15 @@ class COVID19(object):
         """
         data = None
         if timelines:
-            data = self._request("/v2/locations", {"country": country, "timelines": str(timelines).lower()})
+            data = DataSource()._request("/v2/locations", {"country": country, "timelines": str(timelines).lower()})
         else:
-            data = self._request("/v2/locations", {"country": country})
+            data = DataSource()._request("/v2/locations", {"country": country})
         return data["locations"]
 
-    def getLocationById(self, country_id: int):
+     def getLocationById(self, country_id: int):
         """
         :param country_id: Country Id, an int
         :return: A dictionary with case information for the specified location.
         """
-        data = self._request("/v2/locations/" + str(country_id))
+        data = DataSource()._request("/v2/locations/" + str(country_id))
         return data["location"]
