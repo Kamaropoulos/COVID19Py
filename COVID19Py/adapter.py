@@ -32,6 +32,6 @@ class Adapter(covidInterface):
     def getRecovered(self):
         return self.covid19.getLatest()["recovered"]
     
-    def getconfirmed(self):
+    def getConfirmed(self):
         return self.covid19.getLatest()["confirmed"]
     
