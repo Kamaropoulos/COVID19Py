@@ -9,45 +9,50 @@ class COVID19(object):
     previousData = None
     latestData = None
     _valid_data_sources = []
+    __instance__ = None
 
     mirrors_source = "https://raw.github.com/Kamaropoulos/COVID19Py/master/mirrors.json"
     mirrors = None
 
     def __init__(self, url="https://covid-tracker-us.herokuapp.com", data_source='jhu'):
-        # Skip mirror checking if custom url was passed
-        if url == self.default_url:
-            # Load mirrors
-            response = requests.get(self.mirrors_source)
-            response.raise_for_status()
-            self.mirrors = response.json()
+        if COVID19.__instance__ is None:
+            COVID19.__instance__ = self
+            # Skip mirror checking if custom url was passed
+            if url == self.default_url:
+                # Load mirrors
+                response = requests.get(self.mirrors_source)
+                response.raise_for_status()
+                self.mirrors = response.json()
 
-            # Try to get sources as a test
-            for mirror in self.mirrors:
-                # Set URL of mirror
-                self.url = mirror["url"]
-                result = None
-                try:
-                    result = self._getSources()
-                except Exception as e:
-                    # URL did not work, reset it and move on
-                    self.url = ""
-                    continue
+                # Try to get sources as a test
+                for mirror in self.mirrors:
+                    # Set URL of mirror
+                    self.url = mirror["url"]
+                    result = None
+                    try:
+                        result = self._getSources()
+                    except Exception as e:
+                        # URL did not work, reset it and move on
+                        self.url = ""
+                        continue
 
-                # TODO: Should have a better health-check, this is way too hacky...
-                if "jhu" in result:
-                    # We found a mirror that worked just fine, let's stick with it
-                    break
+                    # TODO: Should have a better health-check, this is way too hacky...
+                    if "jhu" in result:
+                        # We found a mirror that worked just fine, let's stick with it
+                        break
 
-                # None of the mirrors worked. Raise an error to inform the user.
-                raise RuntimeError("No available API mirror was found.")
+                    # None of the mirrors worked. Raise an error to inform the user.
+                    raise RuntimeError("No available API mirror was found.")
 
+            else:
+                self.url = url
+
+            self._valid_data_sources = self._getSources()
+            if data_source not in self._valid_data_sources:
+                raise ValueError("Invalid data source. Expected one of: %s" % self._valid_data_sources)
+            self.data_source = data_source
         else:
-            self.url = url
-
-        self._valid_data_sources = self._getSources()
-        if data_source not in self._valid_data_sources:
-            raise ValueError("Invalid data source. Expected one of: %s" % self._valid_data_sources)
-        self.data_source = data_source
+            raise Exception("Only a single instance is permitted")
 
     def _update(self, timelines):
         latest = self.getLatest()
@@ -156,3 +161,12 @@ class COVID19(object):
         """
         data = self._request("/v2/locations/" + str(country_id))
         return data["location"]
+
+    @staticmethod
+    def get_instance():
+        """
+            static method ot fetch the current instance if made
+        """
+        if not COVID19.__instance__:
+            COVID19()
+        return COVID19.__instance__
