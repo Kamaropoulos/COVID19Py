@@ -17,7 +17,6 @@ class COVID19(object):
         """
        self.obj.getAll(timelines=timelines)
 
-
     def getLatestChanges(self):
           """
         :return: The difference between the current and the previously fetched covid numbers.
