@@ -3,7 +3,7 @@ from .getData import GetData
 
 from .covid19 import COVID19
 class Location(object):
-    def __init__(self,Covid19=getData.GetData());
+    def __init__(self,Covid19=getData.GetData()):
         self.locationObj = Covid19
 
     def getLocationByCountryCode(self, country_code, timelines=False) -> List[Dict]:
