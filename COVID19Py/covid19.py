@@ -149,20 +149,7 @@ class COVID19(object):
             data = self._request("/v2/locations", {"country": country})
         return data["locations"]
 
-    def getLocationById(self, country_id: int):
-        """
-        :param country_id: Country Id, an int
-        :return: A dictionary with case information for the specified location.
-        """
-        data = self._request("/v2/locations/" + str(country_id))
-        return data["location"]
-
-    def getCountry(self, country_id: int, country, country_code):
-
-        data = self._request("/v2/locations", {"country": country, "country_code": country_code} + str(country_id))
-        return data["location"]
-
-    def getCountry(self, country_id: getLocationById(), country: getLocationByCountry(), country_code: getLocationByCountryCode()) -> List[Dict]:
+    def getCountry(self, country_id: int, country: getLocationByCountry(), country_code: getLocationByCountryCode()) -> List[Dict]:
 
         data = self._request("/v2/locations", {"country": country, "country_code": country_code} + str(country_id))
         return data["location"]
