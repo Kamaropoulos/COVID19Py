@@ -50,3 +50,9 @@ class Observer(ABC):
     @abstractmethod
     def update(self,subject:Subject) -> None:
         pass
+
+
+class ConcreteObserver(Observer):
+    data = None
+    def update(self,subject:Subject) -> None:
+        self.data = subject._getLatest 
