@@ -38,8 +38,8 @@ class Subject(ABC):
         """
         pass
 
-class ConcreteCovidGetLatest(Subject):
-    _getLatest = None
+class ConcreteCovidGetLocation(Subject):
+    _getLocation = None
 
     _observers = []
 
@@ -53,8 +53,8 @@ class ConcreteCovidGetLatest(Subject):
     def notify(self) -> None:
         for i in self._observers:
             i.update(self)
-    def getLatest(self):
-        self._getLatest = COVID19().getLatest()
+    def getLocationByCountry(self,country: str,timeline=False):
+        self._getLocation = COVID19().getLocationByCountry(country,timeline)
         self.notify()
 
 
@@ -62,4 +62,4 @@ class ConcreteCovidGetLatest(Subject):
 class ConcreteObserver(Observer):
     data = None
     def update(self,subject:Subject) -> None:
-        self.data = subject._getLatest 
+        self.data = subject._getLocation 
