@@ -1,8 +1,11 @@
+from state_machine import (State, Event, acts_as_state_machine, after, before, InvalidStateTransition)
 from typing import Dict, List
 import requests
 import json
 
-class COVID19(object):
+
+@acts_as_state_machine
+class COVID19():
     default_url = "https://covid-tracker-us.herokuapp.com"
     url = ""
     data_source = ""
@@ -12,6 +15,19 @@ class COVID19(object):
 
     mirrors_source = "https://raw.github.com/Kamaropoulos/COVID19Py/master/mirrors.json"
     mirrors = None
+
+    # Define possible states:
+    start_state = State(initial=True)
+    latest_data_state = State()
+
+    # Define possible transitions:
+    transition_to_latest_data_state = Event(from_states=start_state, 
+                                            to_state=latest_data_state)
+    transition_to_start_state = Event(from_states=latest_data_state, 
+                                      to_state=start_state)
+
+    # attribute to hold data for getLatest()
+    _mostRecentData = None
 
     def __init__(self, url="https://covid-tracker-us.herokuapp.com", data_source='jhu'):
         # Skip mirror checking if custom url was passed
@@ -67,7 +83,7 @@ class COVID19(object):
     def _request(self, endpoint, params=None):
         if params is None:
             params = {}
-        response = requests.get(self.url + endpoint, {**params, "source":self.data_source})
+        response = requests.get(self.url + endpoint, {**params, "source": self.data_source})
         response.raise_for_status()
         return response.json()
 
@@ -91,12 +107,12 @@ class COVID19(object):
             }
         return changes
 
-    def getLatest(self) -> List[Dict[str, int]]:
+    @after("transition_to_latest_data_state")
+    def getLatest(self):
         """
-        :return: The latest amount of total confirmed cases, deaths, and recoveries.
+        This method updates `mostRecentData` with latest data.
         """
-        data = self._request("/v2/latest")
-        return data["latest"]
+        self._mostRecentData = self._request("/v2/latest")
 
     def getLocations(self, timelines=False, rank_by: str = None) -> List[Dict]:
         """
@@ -112,7 +128,7 @@ class COVID19(object):
             data = self._request("/v2/locations")
 
         data = data["locations"]
-        
+
         ranking_criteria = ['confirmed', 'deaths', 'recovered']
         if rank_by is not None:
             if rank_by not in ranking_criteria:
@@ -135,7 +151,7 @@ class COVID19(object):
         else:
             data = self._request("/v2/locations", {"country_code": country_code})
         return data["locations"]
-    
+
     def getLocationByCountry(self, country, timelines=False) -> List[Dict]:
         """
         :param country: String denoting name of the country
@@ -156,3 +172,12 @@ class COVID19(object):
         """
         data = self._request("/v2/locations/" + str(country_id))
         return data["location"]
+
+    def getMostRecentData(self) -> List[Dict[str, int]]:
+        """
+        This method returns `mostRecentData`, which contains the latest number of
+        (total) confirmed cases, deaths, and recoveries.
+
+        :return: List[Dict]
+        """
+        return self._mostRecentData["latest"]
