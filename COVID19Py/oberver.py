@@ -3,7 +3,7 @@ from typing import List
 
 class Subject(ABC):
     """
-    The Subject interface declares a set of methods for managing subscribers.
+    Subject interface declares a set of methods for managing subscribers.
     """
 
     @abstractmethod
@@ -43,3 +43,10 @@ class ConcreteCovidGetLatest(Subject):
         for i in _observers:
             i.update(self)
 
+class Observer(ABC):
+    """
+    Observer interface
+    """
+    @abstractmethod
+    def update(self,subject:Subject) -> None:
+        pass
