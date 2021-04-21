@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import List
-
+from .covid19 import COVID19
 class Subject(ABC):
     """
     Subject interface declares a set of methods for managing subscribers.
@@ -42,6 +42,9 @@ class ConcreteCovidGetLatest(Subject):
     def notify(self) -> None:
         for i in _observers:
             i.update(self)
+    def getLatest(self):
+        self._getLatest = COVID19().getLatest()
+        self.notify()
 
 class Observer(ABC):
     """
