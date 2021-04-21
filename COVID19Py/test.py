@@ -1,4 +1,4 @@
-from .observer import *
+from observer import *
 
 subject = ConcreteCovidGetLatest()
 
