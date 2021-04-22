@@ -3,7 +3,7 @@ from typing import List
 from covid19 import COVID19
 
 
-class Observer(ABC):
+class IObserver(ABC):
     """
     Observer interface
     """
@@ -18,14 +18,14 @@ class Subject(ABC):
     """
 
     @abstractmethod
-    def attach(self, observer: Observer) -> None:
+    def attach(self, observer: IObserver) -> None:
         """
         Attach an observer to the subject.
         """
         pass
 
     @abstractmethod
-    def detach(self, observer: Observer) -> None:
+    def detach(self, observer: IObserver) -> None:
         """
         Detach an observer from the subject.
         """
@@ -44,10 +44,10 @@ class ConcreteCovidGetLocation(Subject):
     _observers = []
 
 
-    def attach(self,observer: Observer) -> None:
+    def attach(self,observer: IObserver) -> None:
         self._observers.append(observer)
 
-    def detach(observer: Observer) -> None:
+    def detach(observer: IObserver) -> None:
         self._observers.remove(observer)
 
     def notify(self) -> None:
@@ -59,7 +59,7 @@ class ConcreteCovidGetLocation(Subject):
 
 
 
-class ConcreteObserver(Observer):
+class ConcreteObserver(IObserver):
     data = None
     def update(self,subject:Subject) -> None:
         self.data = subject._getLocation 
