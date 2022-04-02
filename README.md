@@ -90,6 +90,19 @@ to also get timelines.
 location = covid19.getLocationById(39)
 ```
 
+### Getting location by country name:
+
+```python
+location = covid19.getLocationByCountry("Zimbabwe")
+```
+
+or:
+
+```python
+location = covid19.getLocationByCountry("Zimbabwe", timelines=True)
+```
+
+
 ### Getting all data at once:
 
 You can also get all the available data with one command.

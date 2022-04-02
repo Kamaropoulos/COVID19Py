@@ -135,6 +135,19 @@ class COVID19(object):
         else:
             data = self._request("/v2/locations", {"country_code": country_code})
         return data["locations"]
+    
+    def getLocationByCountry(self, country, timelines=False) -> List[Dict]:
+        """
+        :param country: String denoting name of the country
+        :param timelines: Whether timeline information should be returned as well.
+        :return: A list of areas that correspond to the country name. If the country is invalid, it returns an empty list.
+        """
+        data = None
+        if timelines:
+            data = self._request("/v2/locations", {"country": country, "timelines": str(timelines).lower()})
+        else:
+            data = self._request("/v2/locations", {"country": country})
+        return data["locations"]
 
     def getLocationById(self, country_id: int):
         """
